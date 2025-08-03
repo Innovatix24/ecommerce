@@ -1,0 +1,211 @@
+﻿
+@page "/admin/products/create"
+@using Application.Features.Products.Commands
+@using Application.Features.Categories.DTOs;
+@using Application.Features.Products.DTOs
+@using BongoEcom.Components.Inputs
+
+@rendermode InteractiveServer
+@inject IDialogService dialogService;
+@inject IWebHostEnvironment env
+@inject IToastService toastService
+
+<div style="border-radius: 10px; padding:12px; background-color: white;">
+    <div class="container">
+        <h3>Create Product</h3>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="productName" class="form-label">Product Name</label>
+                <InputText @bind-Value="Command.Name" id="productName" class="form-control" placeholder="Enter product name" />
+            </div>
+            <div class="col-md-6">
+                <label for="productNameBangla" class="form-label">Product Name</label>
+                <InputText @bind-Value="Command.NameBangla" id="productNameBangla" class="form-control" placeholder="Enter product name" />
+            </div>
+            <div class="col-md-3">
+                <label for="tag" class="form-label">Tag</label>
+                <InputText @bind-Value="Command.Tag" id="tag" class="form-control" placeholder="Enter product name" />
+            </div>
+            <div class="col-md-3">
+                <label for="price" class="form-label">Regular Price</label>
+                <InputNumber @bind-Value="Command.RegularPrice" id="price" class="form-control" placeholder="0.00" />
+            </div>
+            <div class="col-md-3">
+                <label for="price" class="form-label">Sale Price</label>
+                <InputNumber @bind-Value="Command.SalePrice" id="price" class="form-control" placeholder="0.00" />
+            </div>
+            <div class="col-md-3">
+                <FluentCheckbox @bind-Value="@Command.InStock" Label="In Stock" />
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <FluentCombobox Id="@cmbCategoryId"
+                    Items=@_categories
+                    OptionText="@(i => i.Name)"
+                    Label="Select Category"
+                    Height="200px"
+                    Disabled=@(_categories is null || _categories.Count == 0)
+                    Autocomplete="ComboboxAutocomplete.Both"
+                    Multiple="false"
+                    @bind-SelectedOption=@Category
+                    TOption="CategoryDto" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <label class="form-label">Attributes <FluentButton @onclick="@(() => OpenAddAttributeModal())">Add</FluentButton> </label>
+                @if (Attributes is null || Attributes?.Count == 0)
+                {
+                    <p><em>No attribute added.</em></p>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                            <tr><th>Id</th><th>Name</th><th>Values</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attr in Attributes)
+                            {
+                                <tr>
+                                    <td>@attr.Id</td>
+                                    <td>@attr.Name</td>
+                                    <td>@string.Join(", ", attr.Values.Select(v => v.Value))</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" @onclick="() => EditAttribute(attr)">Edit</button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteAttribute(attr)">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <label class="form-label">Product Images</label>
+                <ImageInputComponent OnFilesChanged="HandleImagesUploaded" />
+            </div>
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Short Description</label>
+            <MyTextEditor @ref="shortEditor" />
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Long Description</label>
+            <MyTextEditor @ref="editor" />
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <label class="form-label">Specifications</label>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-5">
+                        <InputText class="form-control" @bind-Value="specKey" placeholder="Specification Name" />
+                    </div>
+                    <div class="col-md-5">
+                        <InputText class="form-control" @bind-Value="specValue" placeholder="Specification Value" />
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-success w-100" @onclick="AddSpecification">Add</button>
+                    </div>
+                </div>
+
+                @if (Command.Specifications?.Count > 0)
+                {
+                    <table class="table table-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Value</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var spec in Command.Specifications)
+                            {
+                                <tr>
+                                    <td>@spec.Key</td>
+                                    <td>@spec.Value</td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger btn-sm" @onclick="@(() => RemoveSpecification(spec))">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p><em>No specifications added yet.</em></p>
+                }
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 text-end">
+                <FluentButton OnClick="HandleSubmit" Color="Color.Success" Appearance="Appearance.Accent">Save</FluentButton>
+            </div>
+        </div>
+    </div> 
+
+</div>
+
+@code {
+    static string cmbCategoryId = Identifier.NewId();
+    private CreateProductCommand Command = new();
+    private CategoryDto Category { get; set; } = new();
+    private short CategoryId { get; set; }
+    private MyTextEditor editor;
+    private MyTextEditor shortEditor;
+
+    private List<IBrowserFile> uploadedImages = new();
+
+    private void HandleImagesUploaded(List<IBrowserFile> files)
+    {
+        uploadedImages = files;
+    }
+
+    List<ProductAttributeDto> Attributes = new();
+
+
+    private void EditAttribute(ProductAttributeDto attribute)
+    {
+
+    }
+
+    private void DeleteAttribute(ProductAttributeDto attribute)
+    {
+
+    }
+
+    private string specKey = "";
+    private string specValue = "";
+
+    private void AddSpecification()
+    {
+        if (!string.IsNullOrWhiteSpace(specKey) && !string.IsNullOrWhiteSpace(specValue))
+        {
+            Command.Specifications ??= new List<ProductSpecificationDto>();
+            Command.Specifications.Add(new ProductSpecificationDto
+                {
+                    Key = specKey,
+                    Value = specValue
+                });
+
+            specKey = "";
+            specValue = "";
+        }
+    }
+
+    private void RemoveSpecification(ProductSpecificationDto spec)
+    {
+        Command.Specifications?.Remove(spec);
+    }
+}

@@ -1,0 +1,50 @@
+﻿@using Shared.Enums
+<FluentBadge Appearance="@BadgeAppearance"
+             Fill="@BadgeFill"
+             BackgroundColor="@BadgeBackgroundColor"
+             Color="@BadgeColor"
+             OnClick="@OnStatusClick">
+    @StatusText
+</FluentBadge>
+
+@code {
+    [Parameter] public byte Status { get; set; }
+    [Parameter] public string StatusText { get; set; } = string.Empty;
+    [Parameter] public EventCallback OnStatusClick { get; set; }
+
+    private Appearance BadgeAppearance => Status switch
+    {
+        (byte)OrderStatus.Pending => Appearance.Neutral,
+        _ => Appearance.Neutral
+    };
+
+    private string BadgeFill => Status switch
+    {
+        (byte)OrderStatus.Pending => "grey",
+        (byte)OrderStatus.Returned => "red",
+        (byte)OrderStatus.Cancelled => "teal",
+        (byte)OrderStatus.Delivered => "teal",
+        (byte)OrderStatus.Shipped => "teal",
+        _ => "highlight"
+    };
+
+    private string BadgeBackgroundColor => Status switch
+    {
+        (byte)OrderStatus.Pending => "lightgrey",
+        (byte)OrderStatus.Shipped => "teal",
+        (byte)OrderStatus.Returned => "orange",
+        (byte)OrderStatus.Cancelled => "red",
+        (byte)OrderStatus.Delivered => "green",
+        _ => "#ffd800"
+    };
+
+    private string BadgeColor => Status switch
+    {
+        (byte)OrderStatus.Pending => "black",
+        (byte)OrderStatus.Shipped => "white",
+        (byte)OrderStatus.Returned => "white",
+        (byte)OrderStatus.Cancelled => "white",
+        (byte)OrderStatus.Delivered => "white",
+        _ => "#000"
+    };
+}

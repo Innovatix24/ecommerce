@@ -1,0 +1,128 @@
+﻿@rendermode InteractiveServer
+
+@using Application.Features.Products.DTOs
+
+@inject CartService cartService
+@inject SweetAlertService SAlert
+
+<div class="card h-100">
+    <NavLink class="text-decoration-none text-dark" href="@($"/products/{Product.Id}/details")">
+        <div class="card-img-container">
+            <!-- NEW -->
+            <img class="card-img-top product-img" src="@Product.FeatureImageUrl" alt="@Product.Name" />
+        </div>
+
+        <div class="card-body">
+            <h5 class="card-title">@Product.Name</h5>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted">@Product.CategoryName</span>
+                @if(Product.Discount>0){
+                    <span class="badge bg-danger">-@Product.Discount %</span>
+                }
+            </div>
+            <div class="price-section">
+                <div class="price">
+                    <span class="current-price">Tk @Product.SalePrice</span>
+                    @if(Product.RegularPrice > Product.SalePrice)
+                    {
+                        <span class="original-price">Tk @Product.RegularPrice</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </NavLink>
+
+    <div class="card-footer bg-transparent">
+        <button @onclick="@AddToCart" class="btn btn-warning w-100">ADD TO CART</button>
+    </div>
+</div>
+
+
+@code
+{
+    [Parameter]
+    public required ProductDto Product { get; set; } = new();
+
+    private async void AddToCart()
+    {
+        var added = await cartService.AddProduct(Product);
+    }
+}
+<style>
+    .card {
+        border: 0px solid #e0e0e0;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        overflow: hidden; /* NEW */
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+    .card-title {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .price-section {
+        margin: 15px 0;
+    }
+
+        .price-section h4 {
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .price-section small {
+            display: block;
+        }
+
+        .price-section .price {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .price-section .current-price {
+            color: #000;
+            font-weight: 600;
+        }
+
+        .price-section .original-price {
+            color: #888;
+            text-decoration: line-through;
+            font-size: 0.95rem;
+        }
+
+    .btn-warning {
+        background-color: #ffc107;
+        border: none;
+        font-weight: 600;
+        color: #333;
+    }
+
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+
+    /* NEW IMAGE STYLES */
+    .card-img-container {
+        width: 100%;
+        height: 180px; /* adjust as needed */
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa; /* optional: subtle background */
+    }
+
+    .product-img {
+        height: 100%;
+        width: auto;
+        object-fit: cover;
+    }
+</style>

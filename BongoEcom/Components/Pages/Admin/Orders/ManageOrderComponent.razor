@@ -1,0 +1,74 @@
+﻿@using Application.Features.Attributes.DTOs
+@using Application.Features.Orders.Queries
+@using Application.Features.Products.DTOs
+@using BongoEcom.Components.Common
+@using BongoEcom.Services
+@using Shared.Enums
+
+@rendermode InteractiveServer
+@inject IDialogService dialogueService
+
+@* @inject JSHelper js *@
+
+<FluentDialogFooter Visible="false"/>
+<FluentDialogBody>
+    <div>
+        <FluentSelect TOption="OrderStatus"
+                      Items="@StatusList"
+                      Id="people-listbox"
+                      Width="150px"
+                      Height="250px"
+                      Placeholder="Select status"
+                      OptionValue="@(p => p.ToString())"
+                      OptionText="@(p => p.ToString())"
+                      SelectedOptionChanged="@((status) => Content.Status = (byte)status)"
+                      SelectedOption="@((OrderStatus)Content.Status)" />
+
+        <FluentButton BackgroundColor="Green" Appearance="Appearance.Accent" OnClick="@(() => UpdateOrderStatusAsync(Content))">Update</FluentButton>
+    </div>
+
+@*     <div>
+        <FluentDataGrid Items="Content.Items.AsQueryable()"
+                        TGridItem="OrderItemDto"
+                        AutoItemsPerPage="true"
+                        Style="overflow-y:hidden;">
+            <PropertyColumn Property="@(c => c.ProductName)" Sortable="true" />
+            <PropertyColumn Property="@(c => c.Quantity)" Sortable="true" />
+            <PropertyColumn Property="@(c => c.UnitPrice)" Sortable="true" />
+            <PropertyColumn Property="@(c => c.Total)" Sortable="true" />
+        </FluentDataGrid>
+    </div> *@
+
+</FluentDialogBody>
+
+@code {
+    ProductAttributeValueDto value = new();
+    List<ProductAttributeValueDto> Values = new();
+    List<AttributeDto> Attributes = new();
+
+    AttributeDto Attribute = new();
+
+    private void SelectAttribute(AttributeDto item)
+    {
+        Attribute = item;
+    }
+
+    private void RemoveTag(ProductAttributeValueDto item)
+    {
+        Values.Remove(item);
+    }
+
+    private void HandleValueInput(ChangeEventArgs e)
+    {
+        if (e.Value is null) return;
+        value.Value = e.Value.ToString();
+    }
+    private void HandleValueKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Values.Add(value);
+            value = new();
+        }
+    }
+}

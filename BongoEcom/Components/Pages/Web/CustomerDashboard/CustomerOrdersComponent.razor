@@ -1,0 +1,35 @@
+﻿@using Application.Features.Orders.Queries
+
+<h5>Order Items</h5>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Product</th>
+            <th>Attributes</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Order.Items)
+        {
+            <tr>
+                <td>
+                    <img src="@(item.ImageUrl)" class="rounded me-2" style="width: 60px; height: 60px;" />
+                </td>
+                <td>@item.ProductName</td>
+                <td>@((MarkupString)item.AttributeHtml)</td>
+                <td>@item.Quantity</td>
+                <td>৳ @item.UnitPrice</td>
+                <td>৳ @(item.Quantity * item.UnitPrice)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code
+{
+    public OrderDto Order { get; set; } = new();
+}

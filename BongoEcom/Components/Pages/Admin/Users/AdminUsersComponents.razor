@@ -1,0 +1,106 @@
+﻿@page "/admin/users"
+@rendermode InteractiveServer
+@inject IDialogService DialogService;
+
+@using Application.Auth.DTOs
+@using Application.Features.Orders.Commands
+@using Application.Features.Orders.DTOs
+@using Application.Features.Orders.Queries
+@using Shared.Enums
+
+<h3>Order Management</h3>
+
+@if (IsLoading)
+{
+    <p><em>Loading orders...</em></p>
+}
+else if (Users.Count == 0)
+{
+    <p>No orders found.</p>
+}
+else
+{
+    <div id="datagrid-container">
+        <FluentDataGrid Items="Users.AsQueryable()"
+                        TGridItem="UserDto"
+                        Pagination="@pagination"
+                        RowSize="@rowSize"
+                        AutoItemsPerPage="true"
+                        Style="overflow-y:hidden;">
+            <PropertyColumn Property="@(c => c.Id)" Sortable="true"/>
+            <PropertyColumn Property="@(c => c.FullName)" Sortable="true" />
+            <PropertyColumn Property="@(c => c.UserName)" Sortable="true" />
+            <PropertyColumn Property="@(c => c.Email)" Sortable="true" />
+@*             <TemplateColumn Title="Action">
+                <div style="display:flex;">
+                    <FluentButton Appearance="Appearance.Accent" @onclick="@(() => GoToDetails(context))">Details</FluentButton>
+                    <FluentButton Appearance="Appearance.Accent" @onclick="@(() => ManageOrder(context))">Manage</FluentButton>
+                </div>
+            </TemplateColumn> *@
+        </FluentDataGrid>
+        <FluentPaginator State="@pagination" />
+    </div>
+
+    
+
+    @* <FluentAccordion ExpandMode="AccordionExpandMode.Single">
+        @foreach (var order in Orders)
+        {
+            <FluentAccordionItem Heading="@(order.Id.ToString())">
+                <div class="accordion-body">
+                    <p><strong>Placed:</strong> @order.CreatedAt.ToLocalTime()</p>
+                    <p><strong>Status:</strong> @((OrderStatus)order.Status)</p>
+
+                    <h5>Items:</h5>
+                    <ul class="list-group">
+                        @foreach (var item in order.Items)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>@item.ProductName</span>
+                                <span>@item.Quantity x @item.UnitPrice:C</span>
+                            </li>
+                        }
+                    </ul>
+                    <div>
+                        <FluentSelect TOption="OrderStatus"
+                        Label="Select a Status"
+                        Items="@StatusList"
+                        Id="people-listbox"
+                        Width="300px"
+                        Height="250px"
+                        Placeholder="Select status"
+                        OptionValue="@(p => p.ToString())"
+                        OptionText="@(p => p.ToString())"
+                        SelectedOptionChanged="@((status) => order.Status = (byte)status)"
+                        SelectedOption="@((OrderStatus)order.Status)" />
+                    </div>
+                    <div class="mt-3">
+
+
+                        <button class="btn btn-sm btn-primary mt-2"
+                        @onclick="@(() => UpdateOrderStatusAsync(order))">
+                            Update Status
+                        </button>
+                    </div>
+                </div>
+
+            </FluentAccordionItem>
+        }
+    </FluentAccordion> *@
+}
+
+@code {
+
+}
+
+<style>
+
+    #datagrid-container {
+        height: calc(100% - 3rem);
+        min-height: 8rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        background: white;
+    }
+
+</style>

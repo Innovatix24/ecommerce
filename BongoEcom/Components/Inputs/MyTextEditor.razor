@@ -1,0 +1,71 @@
+﻿
+@using Blazored.TextEditor
+@using Microsoft.AspNetCore.Components
+
+<BlazoredTextEditor @ref="@EditorRef">
+    <ToolbarContent>
+        <select class="ql-header">
+            <option selected=""></option>
+            <option value="1"></option>
+            <option value="2"></option>
+            <option value="3"></option>
+            <option value="4"></option>
+            <option value="5"></option>
+        </select>
+        <span class="ql-formats">
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+            <button class="ql-strike"></button>
+        </span>
+        <span class="ql-formats">
+            <select class="ql-color"></select>
+            <select class="ql-background"></select>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+        </span>
+        <span class="ql-formats">
+            <button class="ql-link"></button>
+            <button class="ql-image"></button>
+        </span>
+    </ToolbarContent>
+    <EditorContent>
+
+    </EditorContent>
+</BlazoredTextEditor>
+
+@code {
+    private BlazoredTextEditor EditorRef;
+
+    public async Task<string> GetHtmlAsync()
+    {
+        return await EditorRef.GetHTML();
+    }
+
+    public async Task SetHtmlAsync(string html)
+    {
+        await EditorRef.LoadHTMLContent(html);
+    }
+
+    public async Task<string> GetContentAsync()
+    {
+        return await EditorRef.GetContent();
+    }
+
+    public async Task InsertImageAsync(string imageUrl)
+    {
+        await EditorRef.InsertImage(imageUrl);
+    }
+
+    public async Task InsertTextAsync(string text)
+    {
+        await EditorRef.InsertText(text);
+    }
+
+    public async Task EnableEditorAsync(bool enabled)
+    {
+        await EditorRef.EnableEditor(enabled);
+    }
+}

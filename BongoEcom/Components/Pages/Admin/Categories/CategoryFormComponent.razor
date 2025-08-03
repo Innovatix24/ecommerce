@@ -1,0 +1,112 @@
+﻿@page "/categories/create";
+@using Application.Features.Categories.Commands
+@using Application.Features.Categories.DTOs
+@using Application.Features.Categories.Queries
+@rendermode InteractiveServer
+
+<h3>Create Category</h3>
+
+<EditForm Model="@Command" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Model.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <InputText id="description" class="form-control" @bind-Value="Model.Description" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Create</button>
+    <button class="btn btn-secondary ms-2" type="button" @onclick="@(() => Navigation.NavigateTo("/categories"))">Cancel</button>
+
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert alert-info mt-3">@Message</div>
+    }
+</EditForm>
+
+@code {
+    [Parameter] public short? Id { get; set; }
+
+    class FormModel 
+    {
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+
+    FormModel Model = new();
+    CategoryDto? category = null;
+
+    private CreateCategoryCommand Command = new();
+    private string Message = string.Empty;
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await LoadCategory(Id ?? 0);
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadCategory(short Id)
+    {
+        var query = new GetCategoryByIdQuery(Id);
+        var response = await _mediator.Send(query);
+        if (response.IsSuccess)
+        {
+            category = response.Data ?? new();
+            Model.Name = category.Name;
+            Model.Description = category.Description;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (category is null)
+        {
+            var command = new CreateCategoryCommand()
+            {
+                Name = Model.Name,
+                Description = Model.Description,
+            };
+            var result = await _mediator.Send(Command);
+
+            if (result.IsSuccess)
+            {
+                Message = "Category created successfully!";
+                Navigation.NavigateTo("/admin/categories");
+            }
+            else
+            {
+                Message = result.Error ?? "Failed to create category.";
+            }
+        }
+        else 
+        {
+            var command = new UpdateCategoryCommand()
+                {
+                    Id = category.Id,
+                    Name = Model.Name,
+                    Description = Model.Description,
+                };
+            var result = await _mediator.Send(Command);
+
+            if (result.IsSuccess)
+            {
+                Message = "Category updated successfully!";
+                Navigation.NavigateTo("/admin/categories");
+            }
+            else
+            {
+                Message = result.Error ?? "Failed to create category.";
+            }
+        }
+        
+    }
+}

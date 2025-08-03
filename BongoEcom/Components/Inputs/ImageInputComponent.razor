@@ -1,0 +1,141 @@
+﻿@using Application.Features.Products.DTOs
+@using Microsoft.AspNetCore.Components.Forms
+@inject IJSRuntime JS
+@inject IWebHostEnvironment env
+
+<div class="mb-3">
+    @if (!string.IsNullOrEmpty(Label)){
+        <label class="form-label">@Label</label>
+    }
+    <InputFile OnChange="HandleFilesSelected" multiple accept="image/*" />
+</div>
+
+@if (previewImages.Any())
+{
+    <div class="d-flex flex-wrap gap-3 mt-2">
+        @foreach (var img in previewImages)
+        {
+            <div class="position-relative border rounded p-1" style="width: 100px;">
+                <img src="@img.PreviewUrl" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;" />
+                <button type="button"
+                class="btn-close btn-sm position-absolute top-0 end-0"
+                @onclick="@(() => RemoveImage(img.Id))"
+                title="Remove"></button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    private List<ImageItem> previewImages = new();
+    private List<IBrowserFile> selectedFiles = new();
+
+    [Parameter] public EventCallback<List<IBrowserFile>> OnFilesChanged { get; set; }
+
+    public void SetImages(List<ProductImageDto> images)
+    {
+        foreach (var item in images)
+        {
+            var physicalPath = Path.Combine(env.WebRootPath, item.Url);
+            previewImages.Add(new ImageItem
+                {
+                    PreviewUrl = item.Url
+                });
+        }
+        StateHasChanged();
+    }
+
+    private async Task HandleFilesSelected(InputFileChangeEventArgs e)
+    {
+        var files = e.GetMultipleFiles();
+        foreach (var file in files)
+        {
+            var resized = await file.RequestImageFileAsync(file.ContentType, 300, 300);
+            using var stream = resized.OpenReadStream(10_000_000);
+            var buffer = new byte[resized.Size];
+            await stream.ReadAsync(buffer);
+            var base64 = Convert.ToBase64String(buffer);
+            var id = Guid.NewGuid().ToString();
+
+            previewImages.Add(new ImageItem
+                {
+                    Id = id,
+                    File = file,
+                    PreviewUrl = $"data:{file.ContentType};base64,{base64}"
+                });
+
+            selectedFiles.Add(file);
+        }
+
+        await OnFilesChanged.InvokeAsync(selectedFiles);
+    }
+
+    private async Task AddImage(IBrowserFile file)
+    {
+        var resized = await file.RequestImageFileAsync(file.ContentType, 300, 300);
+        using var stream = resized.OpenReadStream(10_000_000);
+        var buffer = new byte[resized.Size];
+        await stream.ReadAsync(buffer);
+        var base64 = Convert.ToBase64String(buffer);
+        var id = Guid.NewGuid().ToString();
+
+        previewImages.Add(new ImageItem
+            {
+                Id = id,
+                File = file,
+                PreviewUrl = $"data:{file.ContentType};base64,{base64}"
+            });
+
+        selectedFiles.Add(file);
+    }
+
+    private async Task ReplaceImage(string id, InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var index = previewImages.FindIndex(img => img.Id == id);
+        if (index == -1)
+            return;
+
+        var resized = await file.RequestImageFileAsync(file.ContentType, 300, 300);
+        using var stream = resized.OpenReadStream(10_000_000);
+        var buffer = new byte[resized.Size];
+        await stream.ReadAsync(buffer);
+        var base64 = Convert.ToBase64String(buffer);
+
+        var newItem = new ImageItem
+            {
+                Id = id,
+                File = file,
+                PreviewUrl = $"data:{file.ContentType};base64,{base64}"
+            };
+
+        previewImages[index] = newItem;
+
+        var selectedIndex = selectedFiles.FindIndex(f => f.Name == previewImages[index].File.Name);
+        if (selectedIndex != -1)
+        {
+            selectedFiles[selectedIndex] = file;
+        }
+
+        await OnFilesChanged.InvokeAsync(selectedFiles);
+    }
+
+    private async Task RemoveImage(string id)
+    {
+        var item = previewImages.FirstOrDefault(i => i.Id == id);
+        if (item != null)
+        {
+            previewImages.Remove(item);
+            selectedFiles.Remove(item.File);
+            await OnFilesChanged.InvokeAsync(selectedFiles);
+        }
+    }
+
+    private class ImageItem
+    {
+        public string Id { get; set; }
+        public IBrowserFile File { get; set; }
+        public string PreviewUrl { get; set; }
+    }
+}

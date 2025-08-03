@@ -1,0 +1,32 @@
+﻿<span class="chip @Class" @onclick="OnClickHandler">
+    @if (!string.IsNullOrEmpty(Icon))
+    {
+        <i class="@Icon me-1"></i>
+    }
+    @ChildContent
+    @if (OnRemove.HasDelegate)
+    {
+        <button type="button" class="btn-close btn-close-white btn-sm ms-2" @onclick="OnRemoveHandler" aria-label="Remove"></button>
+    }
+</span>
+
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Icon { get; set; }
+    [Parameter] public string Class { get; set; } = "bg-primary text-white";
+    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public EventCallback OnRemove { get; set; }
+
+    private async Task OnClickHandler()
+    {
+        if (OnClick.HasDelegate)
+            await OnClick.InvokeAsync();
+    }
+
+    private async Task OnRemoveHandler(MouseEventArgs e)
+    {
+        // e.StopPropagation();
+        await OnRemove.InvokeAsync();
+    }
+}

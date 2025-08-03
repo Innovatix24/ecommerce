@@ -1,0 +1,99 @@
+﻿@using Application.Features.CompanyInfoes.Queries
+@using BongoEcom.Components.Pages.Web.Cart
+@using BongoEcom.Services
+
+@rendermode InteractiveServer
+
+@inject ProductFilterService FilterService
+@inject CartService CartService
+@* @inject IDialogService dialogService; *@
+@implements IDisposable
+
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject CompanyInfoService companyService
+
+<style>
+    .top-bar {
+    background-color: #f8f9fa;
+    padding: 10px 0;
+    }
+</style>
+
+<div class="top-bar d-flex justify-content-between align-items-center px-3">
+    <div class="d-flex align-items-center px-3">
+        <img src="@CompanyInfo.LogoUrl" alt="Royal Fruitz" style="height: 40px; margin-right:12px;">
+        <div>
+            <h4>@CompanyInfo.CompanyName</h4>
+        </div>
+    </div>
+    <div class="input-group" style="width:350px;">
+        <input @bind=searchKey type="text" class="form-control" placeholder="Search">
+        <button @onclick=HandleSearch class="btn btn-danger"><i class="fas fa-search"></i>Search</button>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button @onclick="@(() => PlaceOrder())" class="btn btn-outline-danger">ORDER NOW</button>
+        @if(Auth.AuthUser is null){
+            <a class="btn btn-danger" href="/login">LOGIN</a>
+        }
+        <button @onclick="@(() => ShowModal())" class="btn btn-outline-dark cart-btn">
+            <i class="fas fa-shopping-cart" style="color:darkorange"></i> ৳ @(CartService.GetTotalPrice())
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cart</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <CartComponent></CartComponent>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    CompanyInfoDto CompanyInfo = new();
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await companyService.Load();
+            CompanyInfo = companyService.CompanyInfo ?? new();
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    string searchKey = "";
+    private void HandleSearch()
+    {
+        FilterService.HandleSearch(searchKey);
+    }
+
+    protected override void OnInitialized()
+    {
+        CartService.OnChange += StateHasChanged;
+        Auth.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+        Auth.OnChange -= StateHasChanged;
+    }
+
+    private async Task ShowModal()
+    {
+        await JS.InvokeVoidAsync("bootstrapInterop.showModal", "#myModal");
+    }
+
+    private async void PlaceOrder()
+    {
+        Navigation.NavigateTo("/checkout");
+    }
+}

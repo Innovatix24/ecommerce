@@ -1,0 +1,179 @@
+﻿@using Application.Features.Orders.Queries
+@using Newtonsoft.Json
+@using BongoEcom.Services
+@using Application.Features.Checkout
+@using global::Shared.Enums
+
+@inject CartService CartService;
+@inject SweetAlertService alertService
+@inject NavigationManager Navigation
+
+@inject UIHelperService UIService
+
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Left: Shipping Details -->
+        <div class="col-lg-7">
+            <h3 class="mb-4">Shipping Details</h3>
+
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <InputText class="form-control" @bind-Value="order.FullName" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <InputText class="form-control" @bind-Value="order.PhoneNumber" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <InputText type="email" class="form-control" @bind-Value="order.Email" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Delivery Address</label>
+                <InputTextArea class="form-control" @bind-Value="order.Address" Rows="3" />
+            </div>
+
+            <div class="m-3">
+                <strong style="color:teal; margin-bottom:16px;">Address Area</strong>
+                @foreach (var item in deliveryCharges)
+                {
+                    <label class="list-group-item d-flex align-items-center cursor-pointer mb-2"
+                    for="@($"deliverycharg{item.Id}")">
+                        <input type="radio"
+                        @onchange="@HandleDelAddChange"
+                        class="form-check-input me-4"
+                        name="deliveryType"
+                        checked="@(item.Id == selectedDeliveryChargeId)"
+                        id="@($"deliverycharg{item.Id}")"
+                        value="@item.Id" />
+                        <div>
+                            <strong>@item.AreaType</strong>
+                            <div class="text-muted small">Charge: @($"{item.ChargeAmount} Tk")</div>
+                        </div>
+                    </label>
+                }
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Note (Optional)</label>
+                <InputTextArea class="form-control" @bind-Value="order.Note" Rows="2" />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Payment Method</label>
+                <InputSelect class="form-control" @bind-Value="order.PaymentMethod">
+                    @foreach (var method in Enum.GetValues<PaymentMethod>())
+                    {
+                        <option value="@method">@method.ToString().Replace("On", " on ")</option>
+                    }
+                </InputSelect>
+            </div>
+        </div>
+
+        <!-- Right: Cart Summary -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-4">Your Order</h5>
+
+                    <div style="max-height:300px; overflow-y:auto;">
+                        @foreach (var item in CartService.Items)
+                        {
+                            <div class="d-flex mb-3 align-items-start border-bottom pb-2">
+                                <img src="@item.ImageUrl" class="rounded me-3" style="width: 40px; height: 40px;" />
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">@item.Name</div>
+                                    <div class="text-muted small">@item.Qty × ৳ @item.Rate</div>
+                                    <div class="text-muted small">@((MarkupString)item.AttributeStr)</div>
+                                </div>
+                                <div class="fw-semibold">৳ @item.Total</div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <div class="d-flex align-items-center p-3">
+                        <InputCheckbox class="me-3" id="hasCoupon" @bind-Value="hasCoupon" />
+                        <label for="hasCoupon"><strong>Has Coupon ?</strong></label>
+                    </div>
+
+                    @if(hasCoupon){
+                        <div class="d-flex align-items-center m-3 p-3">
+                            <label class="me-2" style="font-weight:bold;">Coupon</label>
+                            <InputText class="form-control me-3" style="width:150px;" @bind-Value="order.Coupon" />
+                            <button @onclick="ApplyCoupon" class="btn btn-success">Apply</button>
+                        </div>
+                    }
+
+                    <h5 class="card-title mt-3">Order Summary</h5>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <strong>৳ @CartService.GetTotalPrice()</strong>
+                    </div>
+                    @if(Discount>0)
+                    {
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>Discount @(hasCoupon ? $"(coupon : {order.Coupon} applied)" : "")</strong>
+                            <strong style="color:orangered">- ৳ @Discount</strong>
+                        </div>
+                    }
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Delivery Fee</span>
+                        <strong>৳ @DeliveryCharge</strong>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-3 fw-bold">
+                        <strong>Total</strong>
+                        <strong>৳ @GTotal</strong>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button @onclick="SubmitOrder" type="submit" class="btn btn-warning text-white">Confirm Order</button>
+                        <a href="/cart" class="btn btn-outline-secondary">Back to Cart</a>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Message))
+                    {
+                        <div class="mt-3 alert alert-info">@Message</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private CheckoutOrderCommand order = new();
+    private decimal DeliveryCharge = 50;
+    private string Message = "";
+    private byte selectedDeliveryChargeId = 2;
+    private bool hasCoupon = false;
+
+    private decimal Discount = 0;
+    private decimal Total => CartService.GetTotalPrice();
+    private decimal GTotal => Total + DeliveryCharge - Discount;
+
+    protected override void OnInitialized()
+    {
+        order.DeliveryCharge = DeliveryCharge;
+        order.Total = Total;
+        order.PaymentMethod = PaymentMethod.CashOnDelivery;
+        order.Items = CartService.Items.Select(i => new CheckoutOrderItemDto
+            {
+                ProductId = i.Id,
+                Quantity = i.Qty,
+                UnitPrice = i.Rate,
+                AttributeStr = i.AttributeStr,
+                AttributeJson =  JsonConvert.SerializeObject(i.Attributes),
+                Attributes = i.Attributes,
+                ImageUrl = i.ImageUrl,
+                ImageId = i.ImageId
+            }).ToList();
+    }
+}

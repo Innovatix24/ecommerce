@@ -1,0 +1,226 @@
+﻿@page "/products/{productId:int}/details"
+@using Application.Features.Attributes.DTOs
+@using Application.Features.Products.DTOs
+@using Application.Features.Products.Queries
+@using BongoEcom.Components.Common
+@rendermode InteractiveServer
+
+@inject CartService cartService
+@inject SweetAlertService SAlert
+
+<div class="container">
+    <h3 class="mt-4">@Product?.Name</h3>
+
+    @if (Product is null)
+    {
+        <Loading/>
+    }
+    else
+    {
+        <div class="row">
+            <!-- Images -->
+            <div class="col-md-5">
+                <OverlayImage ImageUrl="@CurrentImageUrl" Class="img-fluid border rounded main-image" />
+
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    @foreach (var img in Product.Images)
+                    {
+                        <img src="@img.Url"
+                        class="img-thumbnail thumb-image @(CurrentImageUrl == img.Url ? "border-primary" : "")"
+                        @onclick="@(() => SelectImage(img.Url))"
+                        title="@img.Tag" />
+                    }
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="col-md-7">
+                <h4 class="text-success">@Product.SalePrice Tk</h4>
+                <p class="text-muted">Status: <FluentBadge>@Product.StockStatus</FluentBadge></p>
+                <p>@((MarkupString)Product.ShortDescription)</p>
+
+                @if (Product.Attributes?.Any() == true)
+                {
+                    @foreach (var attr in Product.Attributes)
+                    {
+                        <div class="mb-3">
+                            <strong>@attr.Name:</strong>
+                            <div class="d-flex flex-wrap gap-2 mt-1">
+                                @foreach (var val in attr.Values)
+                                {
+                                    var selected = SelectedAttributes.TryGetValue(attr.Name, out var selectedVal) && selectedVal == val;
+                                    <FluentBadge OnClick="@(() => SelectAttribute(attr.Name, val))" Circular=true Appearance="@(selected? Appearance.Accent : Appearance.Neutral)">
+                                        @val.Value
+                                    </FluentBadge>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+
+                <strong>Qty</strong>
+                <QuantityComponent OnChange="@OnQtyChange"></QuantityComponent>
+
+                <button class="btn btn-warning mt-2" @onclick="AddToCart">Add to Cart</button>
+            </div>
+
+            @if (Product.Specifications?.Count > 0)
+            {
+                <div class="mt-4">
+                    <h5>Specifications</h5>
+                    <table class="table table-striped table-bordered mt-2">
+                        <tbody>
+                            @foreach (var spec in Product.Specifications)
+                            {
+                                <tr>
+                                    <th class="w-50">@spec.Key</th>
+                                    <td>@spec.Value</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(Product.LongDescription)){
+            <div class="mt-4">
+                <h5>Description</h5>
+                @((MarkupString)Product.LongDescription)
+            </div>
+        }
+    }
+</div>
+@* 
+<OverlayImage ImageUrl="@currentImage" Show="@showOverlay" OnClose="CloseImage"></OverlayImage> *@
+
+@code {
+    [Parameter] public int ProductId { get; set; }
+
+    private ProductDto? Product;
+    private string? CurrentImageUrl;
+
+    private bool isLoading = true;
+
+    private bool showOverlay = false;
+    private string? currentImage;
+
+    void ShowImage(string imageUrl)
+    {
+        currentImage = imageUrl;
+        showOverlay = true;
+    }
+    Task CloseImage()
+    {
+        showOverlay = false;
+        currentImage = null;
+        return Task.CompletedTask;
+    }
+
+    List<string> imagesUrls = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = new GetProductDetailsByIdQuery((short)ProductId);
+        var result = await _mediator.Send(query);
+        if (result.IsSuccess)
+        {
+            Product = result.Data ?? new();
+            CurrentImageUrl = Product.FeatureImageUrl;
+
+            imagesUrls = Product.Images.Select(x => x.Url).ToList();
+        }
+        isLoading = false;
+    }
+
+    private Dictionary<string, ProductAttributeValueDto> SelectedAttributes = new();
+
+    private void SelectAttribute(string attributeName, ProductAttributeValueDto value)
+    {
+        SelectedAttributes[attributeName] = value;
+    }
+
+    private void SelectImage(string url)
+    {
+        CurrentImageUrl = url;
+    }
+
+    int qty = 1;
+    private void OnQtyChange(int value)
+    {
+        qty = value;
+    }
+
+    private async void AddToCart()
+    {
+
+        var attributes = new List<ItemAttribute>();
+
+        foreach(var att in SelectedAttributes)
+        {
+            var k = new ItemAttribute
+                {
+                    Key = att.Key,
+                    Value = att.Value.Value,
+                };
+            attributes.Add(k);
+        }
+        if (Product is null) return;
+        var added = await cartService.AddProduct(Product, attributes: attributes, qty: qty);
+
+        // int imageId = 0;
+
+        // var firstImage = Product.Images.FirstOrDefault();
+        // if (firstImage is not null) imageId = firstImage.Id;
+
+        // var item = new CartItemModel
+        //     {
+        //         Id = Product.Id,
+        //         Name = Product.Name,
+        //         Rate = Product.SalePrice,
+        //         Qty = qty,
+        //         ImageUrl = Product.FeatureImageUrl,
+        //         ImageId = imageId,
+        //         Attributes = attributes,
+        //     };
+        // cartService.AddItem(item);
+    }
+}
+
+
+<style>
+    .main-image {
+        max-height: 300px;
+        object-fit: contain;
+        width: 100%;
+    }
+
+    .thumb-image {
+        height: 60px;
+        width: 60px;
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border 0.3s ease;
+    }
+
+        .thumb-image:hover {
+            border: 2px solid #007bff;
+        }
+
+    .badge {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        border-radius: 20px;
+    }
+
+    .btn-outline-secondary {
+        border: 1px solid #ccc;
+        color: #333;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: #fff;
+    }
+</style>

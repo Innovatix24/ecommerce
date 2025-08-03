@@ -1,0 +1,68 @@
+﻿@using BongoEcom.Services
+
+@inject CartService cartService;
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+<div class="offcanvas offcanvas-end show position-static" tabindex="-1" style="width: 100%; border-left: none;">
+    <div class="offcanvas-body p-3">
+
+        @foreach (var item in cartService.Items)
+        {
+            <div class="d-flex mb-3 align-items-start">
+                <img src="@(item.ImageUrl)" class="rounded me-2" style="width: 60px; height: 60px;" />
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">Himsagar Mango 25 Kg</div>
+                    <div class="text-muted small">@item.Qty × ৳ @item.Rate</div>
+                    <div class="text-muted small"> @((MarkupString)item.AttributeStr)</div>
+                </div>
+                <button @onclick=@(()=> RemoveItem(item.Id)) class="btn btn-sm btn-light ms-2">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+        }
+
+        <!-- Subtotal -->
+        <hr />
+        <div class="d-flex justify-content-between mb-3">
+            <strong>Subtotal:</strong>
+            <strong>৳ @(cartService.GetTotalPrice())</strong>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button @onclick=@PlaceOrder class="btn btn-danger text-white">ORDER NOW</button>
+        </div>
+
+    </div>
+</div>
+
+@code
+{
+    // [CascadingParameter]
+    // public FluentDialog Dialog { get; set; } = default!;
+
+
+    protected override void OnInitialized()
+    {
+        cartService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        cartService.OnChange -= StateHasChanged;
+    }
+
+    private void RemoveItem(int id)
+    {
+        cartService.RemoveItem(id);
+    }
+
+    private async void PlaceOrder()
+    {
+        await JS.InvokeVoidAsync("bootstrapInterop.hideModal", "#myModal");
+        Navigation.NavigateTo("/checkout");
+    }
+}

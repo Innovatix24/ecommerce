@@ -1,0 +1,134 @@
+﻿@page "/order-confirmation/{OrderId:int}"
+@using Application.Features.Orders.DTOs
+@using Application.Features.Orders.Queries
+@using BongoEcom.PDF
+@using QuestPDF.Fluent
+@using Shared.Enums
+
+
+@inject IJSRuntime JS;
+@inject IWebHostEnvironment _env;
+@inject CompanyInfoService companyService;
+
+<h3 class="text-success my-4">🎉 Order Confirmed!</h3>
+
+@if (isLoading)
+{
+    <div>Loading ... </div>
+}
+else if (Order == null)
+{
+    <div class="alert alert-danger">Order not found.</div>
+}
+else
+{
+    <div class="container my-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <div class="d-flex justify-content-between">
+                    <h4>Thank you for your order, <span class="text-primary">@Order.CustomerName</span>!</h4>
+                    <button class="btn btn-primary" @onclick="@Print">Print</button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <p class="text-muted">We've received your order and it's currently being processed.</p>
+
+                <hr />
+                <p><strong>Order ID:</strong> #@Order.OrderNo</p>
+                <p><strong>Status:</strong> @((OrderStatus)Order.Status)</p>
+                <p><strong>Delivery Address:</strong> @Order.DeliveryAddress</p>
+                <p><strong>Phone:</strong> @Order.CustomerPhone</p>
+                <p><strong>Payment Method:</strong> @((PaymentMethod.CashOnDelivery))</p>
+                <p><strong>Order Date:</strong> @Order.CreatedAt.ToString("f")</p>
+
+                @if(Order.Coupon is not null)
+                {
+                    <p><strong>Coupon :</strong> <strong>@Order.Coupon.Code</strong> is applied</p>
+                }
+
+                <hr />
+
+                <h5>Order Items</h5>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Product</th>
+                            <th>Attributes</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Order.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <img src="@(item.ImageUrl)" class="rounded me-2" style="width: 60px; height: 60px;" />
+                                </td>
+                                <td>@item.ProductName</td>
+                                <td>@((MarkupString)item.AttributeHtml)</td>
+                                <td>@item.Quantity</td>
+                                <td>৳ @item.UnitPrice</td>
+                                <td>৳ @(item.Quantity * item.UnitPrice)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <strong>Subtotal:</strong>
+                    <span>৳ @Order.SubTotal</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <strong>Discount:</strong>
+                    <span style="color:orangered;"> - ৳ @Order.Discount</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <strong>Delivery Charge:</strong>
+                    <span>৳ @Order.DeliveryCharge</span>
+                </div>
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                    <strong>Total:</strong>
+                    <span>৳ @Order.TotalAmount</span>
+                </div>
+                <div class="mt-4">
+                    <a href="/" class="btn btn-primary">Back to Home</a>
+                    <a href="/orders" class="btn btn-outline-secondary ms-2">View My Orders</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int OrderId { get; set; }
+
+    private OrderDto? Order;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var query = new GetOrderDetailsByIdQuery(OrderId);
+        var result = await _mediator.Send(query);
+
+        if(result.IsSuccess)
+        {
+            Order = result.Data;
+        }
+        isLoading = false;
+    }
+
+    private async void Print()
+    {
+        if (Order is null) return;
+        await companyService.Load();
+        var document = new OrderPdfDocument(Order, _env, companyService.CompanyInfo);
+        var bytes = document.GeneratePdf();
+        var base64Str = Convert.ToBase64String(bytes);
+        await JS.InvokeVoidAsync("openPdfInNewTab", base64Str);
+    }
+}

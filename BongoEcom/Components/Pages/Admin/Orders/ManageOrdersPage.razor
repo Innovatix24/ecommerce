@@ -1,0 +1,93 @@
+﻿@page "/admin/orders"
+@rendermode InteractiveServer
+@inject IDialogService DialogService;
+@inject IJSRuntime JS;
+@inject IWebHostEnvironment _env;
+@inject CompanyInfoService companyService;
+
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons;
+@using Application.Features.Orders.Commands
+@using Application.Features.Orders.DTOs
+@using Application.Features.Orders.Queries
+@using BongoEcom.Components.Common
+@using Shared.Enums
+
+<div class="card">
+    <div class="card-body">
+        <div style="display:flex; justify-content:space-between;">
+            <h3>Order Management</h3>
+            <FluentSearch Placeholder="Search" ValueChanged="HandleSearch"/>
+
+            <FluentSelect TOption="OrderStatus"
+                          Items="@StatusList"
+                          Width="150px"
+                          Height="250px"
+                          Placeholder="Select status"
+                          OptionValue="@(p => p.ToString())"
+                          OptionText="@(p => p.ToString())"
+                          SelectedOptionChanged="@HandleStatusFilterChanged"
+                          SelectedOption="@(FilterStatus)" />
+        </div>
+
+
+        @if (IsLoading)
+        {
+            <Loading></Loading>
+        }
+        else if (OrdersFiltered.Count == 0)
+        {
+            <p>No orders found.</p>
+        }
+        else
+        {
+            <div style="height:85vh;" id="datagrid-container">
+                <FluentDataGrid Items="OrdersFiltered.AsQueryable()"
+                                TGridItem="OrderDto"
+                                Pagination="@pagination"
+                                RowSize="@rowSize"
+                                AutoItemsPerPage="true"
+                                ShowHover="true"
+                                Style="overflow-y:hidden;">
+                    <PropertyColumn Property="@(c => "#" + c.OrderNo.ToString())" Sortable="true" Title="Order No" />
+                    <PropertyColumn Property="@(c => c.CustomerName)" Sortable="true" Title="Customer" />
+                    <PropertyColumn Property="@(c => c.CustomerPhone)" Title="Mobile" />
+                    <PropertyColumn Property="@(c => c.DeliveryAddress)" Title="Shipping Address" />
+                    <PropertyColumn Property="@(c => c.TotalStr)" Title="Total" />
+                    <TemplateColumn Title="Order Time">
+                        <DateTimeComponent Value="@context.CreatedAt" />
+                    </TemplateColumn>
+                    <TemplateColumn Title="Status">
+                        <OrderStatusBadge Status="@context.Status"
+                                          StatusText="@context.StatusStr"
+                                          OnStatusClick="@(() => ManageOrder(context))" />
+                    </TemplateColumn>
+                    <TemplateColumn Title="Action">
+                        <div style="display:flex;">
+                            @* <FluentButton Appearance="Appearance.Accent" @onclick="@(() => GoToDetails(context))">Details</FluentButton> *@
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Open())"
+                                          Title="Details"
+                                          Color="Color.Error"
+                                          OnClick="@(() => GoToDetails(context))" />
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.DocumentPdf())"
+                                          Title="PDF"
+                                          OnClick="@(() => PrintOrder(context))" />
+                        </div>
+                    </TemplateColumn>
+                </FluentDataGrid>
+                <FluentPaginator State="@pagination" />
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+
+    #datagrid-container {
+        height: calc(100% - 3rem);
+        min-height: 8rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        background : white;
+    }
+
+</style>

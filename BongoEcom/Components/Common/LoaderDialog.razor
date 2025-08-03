@@ -1,0 +1,12 @@
+﻿
+@implements IDialogContentComponent;
+
+<Loading Message="@Content"></Loading>
+
+@code {
+    [CascadingParameter]
+    public FluentDialog Dialog { get; set; } = default!;
+
+    [Parameter]
+    public string? Content { get; set; }
+}

@@ -1,0 +1,20 @@
+﻿@page "/search-result"
+@rendermode InteractiveServer
+
+@inject CategoryStateService State;
+
+@using BongoEcom.Components.Pages.Web.Products
+@using BongoEcom.Components.Pages.Web.Shop
+
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <CategoriesComponent></CategoriesComponent>
+        </div>
+        <div class="col-md-9 mb-4">
+            <ProductListComponent Products="@Products"></ProductListComponent>
+        </div>
+    </div>
+</div>
+

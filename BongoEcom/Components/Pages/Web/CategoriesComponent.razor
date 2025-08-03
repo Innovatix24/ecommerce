@@ -1,0 +1,129 @@
+﻿@using Application.Features.Categories.DTOs
+@using Application.Features.Categories.Queries
+@using BongoEcom.Services
+
+@rendermode InteractiveServer
+
+@inject CategoryStateService State
+
+
+
+<style>
+    .browse-menu {
+    font-family: 'Segoe UI', sans-serif;
+    padding: 1.5rem;
+    background: #f9f9fb;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    max-width: 400px;
+    margin: 1rem auto;
+    }
+
+    .menu-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 0.3rem;
+    }
+
+    .category-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    }
+
+    .category-list li {
+    display: inline-block;
+    }
+
+    .category-button {
+        background-color: #fff;
+        color: #333;
+        border: 0px solid #ddd;
+        padding: 0.4rem 1rem;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        outline:none;
+    }
+
+    .category-button:hover {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+    }
+
+    .category-button.active {
+        background-color: #007bff;
+        color: white;
+        border-color: #007bff;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
+    }
+
+    .category-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.4);
+    }
+</style>
+
+
+<div class="browse-menu">
+    <h3 class="menu-title">Browse Categories</h3>
+    <ul class="category-list">
+        @foreach (var category in Categories)
+        {
+            var isSelected = _selectedCategoryId == category.Id;
+            var activeClass = isSelected ? "active" : "";
+
+            <li>
+                <button class="category-button @activeClass"
+                @onclick="() => SelectCategory(category.Id)"
+                tabindex="0">
+                    @category.Name
+                </button>
+            </li>
+        }
+    </ul>
+</div>
+
+
+@code {
+    bool IsBusy = false;
+    private int _selectedCategoryId = 0;
+    public List<CategoryDto> Categories = new();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender){
+            await LoadCategory();
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void SelectCategory(int categoryId)
+    {
+        _selectedCategoryId = categoryId;
+        State.SetSelectedCategory(categoryId);
+    }
+
+    private async Task LoadCategory()
+    {
+        IsBusy = true;
+        Categories = new();
+        var query = new GetAllCategoriesQuery();
+        var result = await _mediator.Send(query);
+        if(result.IsSuccess)
+        {
+            Categories = result.Data ?? new();
+            Categories.Insert(0, new CategoryDto { Id = 0, Name = "All", Description = "Show all products" });
+            StateHasChanged();
+        }
+        IsBusy = false;
+    }
+}

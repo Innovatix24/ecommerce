@@ -1,0 +1,124 @@
+﻿@using Application.Features.Dashboard.Queries
+@using Application.Features.Orders.Queries
+@using QuestPDF.Fluent
+@using BongoEcom.Components.Common
+
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons;
+@using BongoEcom.Components.Pages.Admin.Orders
+@using BongoEcom.PDF
+@inject IDialogService DialogService;
+@inject IJSRuntime JS;
+@inject IWebHostEnvironment _env;
+@inject CompanyInfoService companyService;
+
+<h4 class="mt-4 mb-2">Recent Orders</h4>
+@if(_orderLoading)
+{
+    <Loading Message="Loading Orders..."></Loading>
+}
+else
+{
+    <FluentDataGrid Items="RecentOrders.AsQueryable()"
+    TGridItem="OrderDto"
+    RowSize="@rowSize"
+    AutoItemsPerPage="true"
+    ShowHover="true"
+    Style="overflow-y:hidden;">
+        <PropertyColumn Property="@(c => "#" + c.OrderNo.ToString())" Sortable="true" Title="Order No" />
+        <PropertyColumn Property="@(c => c.CustomerName)" Sortable="true" Title="Customer" />
+        <PropertyColumn Property="@(c => c.CustomerPhone)" Title="Mobile" />
+        <PropertyColumn Property="@(c => c.TotalStr)" Title="Total" Align="Align.End"/>
+        <TemplateColumn Title="Order Time">
+            <DateTimeComponent Value="@context.CreatedAt" />
+        </TemplateColumn>
+        <TemplateColumn Title="Status" Align="Align.Center">
+            <OrderStatusBadge Status="@context.Status"
+            StatusText="@context.StatusStr"
+            OnStatusClick="@(() => ManageOrder(context))" />
+        </TemplateColumn>
+        <TemplateColumn Title="Action">
+            <div style="display:flex;">
+                <FluentButton IconEnd="@(new Icons.Regular.Size16.Open())"
+                Title="Details"
+                Color="Color.Error"
+                OnClick="@(() => GoToDetails(context))" />
+                <FluentButton IconEnd="@(new Icons.Regular.Size16.DocumentPdf())"
+                Title="PDF"
+                OnClick="@(() => PrintOrder(context))" />
+            </div>
+        </TemplateColumn>
+    </FluentDataGrid>
+}
+
+@code{
+    List<OrderDto> RecentOrders { get; set; } = new();
+
+    DataGridRowSize rowSize = DataGridRowSize.Medium;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await LoadRecentOrders();
+            StateHasChanged();
+            await companyService.Load();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    bool _orderLoading = true;
+    private async Task LoadRecentOrders()
+    {
+        _orderLoading = true;
+        StateHasChanged();
+
+        var query = new GetRecentOrdersQuery();
+        var response = await _mediator.Send(query);
+        if (response.IsSuccess)
+        {
+            RecentOrders = response.Data ?? new();
+        }
+        _orderLoading = false;
+        StateHasChanged();
+    }
+
+    public void GoToDetails(OrderDto order)
+    {
+        Navigation.NavigateTo($"admin/order/{order.Id}/details");
+    }
+
+    private async void PrintOrder(OrderDto order)
+    {
+        var query = new GetOrderDetailsByIdQuery(order.Id);
+        var result = await _mediator.Send(query);
+
+        if (result.IsSuccess)
+        {
+            if (result.Data is null) return;
+            var document = new OrderPdfDocument(result.Data, _env, companyService.CompanyInfo);
+            var bytes = document.GeneratePdf();
+            var base64Str = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("openPdfInNewTab", base64Str);
+        }
+    }
+
+    public async void ManageOrder(OrderDto order)
+    {
+        DialogParameters parameters = new()
+            {
+                Title = $"Update status",
+                Width = "300px",
+                TrapFocus = false,
+                Modal = false,
+                PreventScroll = true
+            };
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<ManageOrderComponent>(order, parameters);
+        DialogResult? result = await dialog.Result;
+        if (result.Data is not null)
+        {
+            await LoadRecentOrders();
+        }
+    }
+}

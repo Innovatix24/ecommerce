@@ -1,0 +1,59 @@
+﻿
+<img src="@ImageUrl" class="@Class" style="@(Style + "cursor:pointer;")" @onclick="() => ShowImage()" />
+
+@if (Show && !string.IsNullOrEmpty(ImageUrl))
+{
+    <div class="image-overlay" @onclick="OnOverlayClick">
+        <div class="overlay-content" @onclick:stopPropagation>
+            <button class="close-btn" @onclick="Close">✖</button>
+            @if(Images is not null && Images.Count>0)
+            {
+                <button class="nav-btn prev-btn" @onclick="Prev">&#10094;</button>
+                <img src="@Images[currentImageIndex]" class="fullscreen-image" />
+                <button class="nav-btn next-btn" @onclick="Next">&#10095;</button>
+            }
+            else {
+                <img src="@ImageUrl" class="fullscreen-image" />
+            }
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? ImageUrl { get; set; }
+
+    [Parameter] public List<string>? Images { get; set; }
+
+    int currentImageIndex = 0;
+
+    public bool Show = false;
+
+    private void Close()
+    {
+        Show = false;
+    }
+
+    private void OnOverlayClick()
+    {
+        Show = false;
+    }
+    void ShowImage()
+    {
+        Show = true;
+    }
+
+    private void Next()
+    {
+        if (Images == null || Images.Count == 0) return;
+        currentImageIndex = (currentImageIndex + 1) % Images.Count;
+    }
+
+    private void Prev()
+    {
+        if (Images == null || Images.Count == 0) return;
+        currentImageIndex = (currentImageIndex - 1 + Images.Count) % Images.Count;
+    }
+}

@@ -1,0 +1,106 @@
+﻿
+@using Application.Features.Categories.Commands
+@using Application.Features.Categories.DTOs
+@using Application.Features.Categories.Queries
+@rendermode InteractiveServer
+@inject IDialogService dialogueService
+
+@* @inject JSHelper js *@
+
+<FluentDialogFooter>
+    <FluentButton BackgroundColor="Green" Appearance="Appearance.Accent" OnClick="@(() => HandleValidSubmit())">Save</FluentButton>
+    <FluentButton BackgroundColor="OrangeRed" Appearance="Appearance.Accent" OnClick="@(() => CancelAsync())">Cancel</FluentButton>
+</FluentDialogFooter>
+
+<FluentDialogBody>
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Content.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <InputText id="description" class="form-control" @bind-Value="Content.Description" />
+    </div>
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert alert-info mt-3">@Message</div>
+    }
+</FluentDialogBody>
+
+@code {
+    EditForm Form;
+    private string Message = string.Empty;
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    private string? ValidateForm()
+    {
+        if(string.IsNullOrEmpty(Content.Name))
+        {
+            return "Name is required";
+        }
+        if (string.IsNullOrEmpty(Content.Name))
+        {
+            return "Description is required";
+        }
+        return null;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var error = ValidateForm();
+
+        if(!string.IsNullOrEmpty(error)){
+            Message = error;
+            return;
+        }
+
+        if (Content.Id == 0)
+        {
+            var command = new CreateCategoryCommand()
+                {
+                    Name = Content.Name,
+                    Description = Content.Description,
+                };
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+            {
+                Message = "Category created successfully!";
+                await Dialog.CloseAsync(true);
+            }
+            else
+            {
+                Message = result.Error ?? "Failed to create category.";
+            }
+        }
+        else
+        {
+            var command = new UpdateCategoryCommand()
+                {
+                    Id = Content.Id,
+                    Name = Content.Name,
+                    Description = Content.Description,
+                };
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+            {
+                Message = "Category updated successfully!";
+                await Dialog.CloseAsync(true);
+            }
+            else
+            {
+                Message = result.Error ?? "Failed to create category.";
+            }
+        }
+
+    }
+}

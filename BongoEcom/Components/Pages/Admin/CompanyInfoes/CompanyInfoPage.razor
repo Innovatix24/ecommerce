@@ -1,0 +1,129 @@
+﻿@page "/admin/company-info"
+@using Application.Features.CompanyInfoes.Commands
+@using Application.Features.Products.DTOs
+@using BongoEcom.Components.Inputs
+
+@rendermode InteractiveServer
+@inject IWebHostEnvironment env
+@inject IToastService tostService
+
+<FluentCard AreaRestricted="false">
+    <h3>Company Info</h3>
+
+    <FluentGrid>
+        <FluentGridItem md="12">
+            <FluentTextField @bind-Value=@CompanyInfo.CompanyName Label="CompanyName" style="width: 100%;"></FluentTextField>
+        </FluentGridItem>
+        <FluentGridItem md="6">
+            <FluentTextField @bind-Value=@CompanyInfo.MobileNumber Label="Mobile Number" style="width: 100%;"></FluentTextField>
+        </FluentGridItem>
+        <FluentGridItem md="6">
+            <FluentTextField @bind-Value=@CompanyInfo.Email Label="Email" style="width: 100%;"></FluentTextField>
+        </FluentGridItem>
+        <FluentGridItem md="12">
+            <FluentTextArea @bind-Value=@CompanyInfo.Address Label="Address" style="width: 100%;" />
+        </FluentGridItem>
+        <FluentGridItem md="12">
+            <FluentStack Orientation="Orientation.Horizontal">
+                <label class="form-label">Company Logo</label>
+                <div class="position-relative border rounded p-1" style="width: 100px;">
+                    <img src="@CompanyInfo.LogoUrl" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;" />
+                </div>
+                <ImageInputComponent OnFilesChanged="HandleImagesUploaded" />
+            </FluentStack>
+        </FluentGridItem>
+        <FluentGridItem md="12">
+            <FluentButton Appearance="Appearance.Accent" OnClick="@HandleSave">Save</FluentButton>
+        </FluentGridItem>
+    </FluentGrid>
+</FluentCard>
+
+@code {
+    private List<IBrowserFile> uploadedImages = new();
+
+    private void HandleImagesUploaded(List<IBrowserFile> files)
+    {
+        uploadedImages = files;
+    }
+
+    private string? Validate()
+    {
+        if(string.IsNullOrEmpty(CompanyInfo.CompanyName))
+        {
+            return "Company name is required";
+        }
+        if (string.IsNullOrEmpty(CompanyInfo.MobileNumber))
+        {
+            return "Mobile number is required";
+        }
+        if (string.IsNullOrEmpty(CompanyInfo.Email))
+        {
+            return "Email is required";
+        }
+        if (string.IsNullOrEmpty(CompanyInfo.Address))
+        {
+            return "Address is required";
+        }
+        return null;
+    }
+
+    private async void HandleSave()
+    {
+        var error = Validate();
+        if(!string.IsNullOrEmpty(error))
+        {
+            tostService.ShowError(error);
+            return;
+        }
+
+        var command = new CreateCompanyInfoCommand();
+        command.CompanyName = CompanyInfo.CompanyName;
+        command.Email = CompanyInfo.Email;
+        command.MobileNumber = CompanyInfo.MobileNumber;
+        command.Address = CompanyInfo.Address;
+        command.CompanyName = CompanyInfo.CompanyName;
+        command.LogoUrl = await GetLogoUrl();
+
+        var response = await _mediator.Send(command);
+
+        if(response.IsSuccess)
+        {
+            tostService.ShowSuccess("Changes are saved");
+        }
+        else
+        {
+            tostService.ShowSuccess("Something went wrong");
+            DeleteImage(command.LogoUrl);
+        }
+    }
+
+    private async Task<string> GetLogoUrl()
+    {
+        if (uploadedImages.Count == 0) return "";
+
+        var item = uploadedImages.First();
+        var extension = Path.GetExtension(item.Name);
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var relativePath = Path.Combine("images", fileName);
+        var absolutePath = Path.Combine(env.WebRootPath, relativePath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
+
+        using (var fileStream = new FileStream(absolutePath, FileMode.Create))
+        {
+            await item.OpenReadStream(maxAllowedSize: 10_000_000).CopyToAsync(fileStream);
+        }
+
+        return $"/{relativePath.Replace("\\", "/")}";
+    }
+
+    private void DeleteImage(string url){
+        string relativePath = url.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+        string fullPath = Path.Combine(env.WebRootPath, relativePath);
+
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+        }
+    }
+}

@@ -1,0 +1,65 @@
+﻿@using Application.Features.Orders.Queries
+
+@inject NavigationManager Nav
+
+<EditForm Model="coupon" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Code</label>
+        <InputText class="form-control" @bind-Value="coupon.Code" />
+    </div>
+
+    <div class="form-group">
+        <label>Discount Type</label>
+        <InputSelect class="form-control" @bind-Value="coupon.DiscountType">
+            <option value="Fixed">Fixed</option>
+            <option value="Percent">Percent</option>
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label>Discount Value</label>
+        <InputNumber class="form-control" @bind-Value="coupon.DiscountValue" />
+    </div>
+
+    <div class="form-group">
+        <label>Minimum Purchase Amount</label>
+        <InputNumber class="form-control" @bind-Value="coupon.MinimumPurchaseAmount" />
+    </div>
+
+    <div class="form-group">
+        <label>Max Usage Count</label>
+        <InputNumber class="form-control" @bind-Value="coupon.MaxUsageCount" />
+    </div>
+
+    <div class="form-group">
+        <label>Expiry Date</label>
+        <InputDate class="form-control" @bind-Value="coupon.ExpiryDate" />
+    </div>
+
+    <div class="form-group">
+        <InputCheckbox @bind-Value="coupon.IsActive" /> Active
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancel</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? CouponId { get; set; }
+    private CouponDto coupon = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CouponId.HasValue) ;
+    }
+
+    private async Task Save()
+    {
+        Nav.NavigateTo("/admin/coupons");
+    }
+
+    void GoBack() => Nav.NavigateTo("/admin/coupons");
+}

@@ -1,0 +1,45 @@
+﻿
+<style>
+
+    .dashboard-header {
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 45px;
+        background: orange;
+        color: white;
+        padding: 15px 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+        .dashboard-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+    .logout-button {
+        background-color: white;
+        color: #007bff;
+        padding: 8px 16px;
+        font-size: 14px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.2s ease;
+    }
+
+        .logout-button:hover {
+            background-color: #e6e6e6;
+        }
+</style>
+
+<div class="dashboard-header">
+    <h2>🛍️ E-Commerce</h2>
+    <button class="logout-button" onclick="logout()">Logout</button>
+</div>
+
+@code {
+
+}

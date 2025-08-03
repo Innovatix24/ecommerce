@@ -1,0 +1,62 @@
+﻿@page "/image-uploader"
+
+@rendermode InteractiveServer
+
+@inject IJSRuntime JS
+
+<h3>Image Upload with Preview (Multiple, JS Interop, Crop)</h3>
+
+<InputFile OnChange="HandleFileChange" multiple accept="image/*" />
+
+<div class="preview-container">
+    @foreach (var image in PreviewImages)
+    {
+        <img class="preview-image" id="@image.Id" />
+    }
+</div>
+
+@if (PreviewImages.Any())
+{
+    <button class="btn btn-primary" @onclick="CropImages">Crop & Upload</button>
+}
+
+@code {
+    private List<PreviewImageModel> PreviewImages = new();
+
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+        PreviewImages.Clear();
+
+        foreach (var file in e.GetMultipleFiles(5)) // Limit to 5 files
+        {
+            if (file.ContentType.StartsWith("image/") && file.Size <= 2 * 1024 * 1024)
+            {
+                var imageId = $"img_{Guid.NewGuid().ToString("N")}";
+                PreviewImages.Add(new PreviewImageModel { Id = imageId, File = file });
+
+                using var stream = file.OpenReadStream();
+                var buffer = new byte[file.Size];
+                await stream.ReadAsync(buffer);
+
+                var base64 = Convert.ToBase64String(buffer);
+                var format = file.ContentType;
+                await JS.InvokeVoidAsync("setImageSrc", imageId, $"data:{format};base64,{base64}");
+            }
+        }
+    }
+
+    private async Task CropImages()
+    {
+        foreach (var image in PreviewImages)
+        {
+            var croppedBase64 = await JS.InvokeAsync<string>("cropImage", image.Id);
+            // Now you can send croppedBase64 to the server or convert it to byte[]
+        }
+    }
+
+    public class PreviewImageModel
+    {
+        public string Id { get; set; } = string.Empty;
+        public IBrowserFile File { get; set; } = default!;
+    }
+}

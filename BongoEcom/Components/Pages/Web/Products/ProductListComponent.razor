@@ -1,0 +1,27 @@
+﻿
+@rendermode InteractiveServer
+
+@using Application.Features.Products.DTOs
+@using BongoEcom.Components.Pages.Web.Shop
+
+<div class="row">
+
+    @if(Products.Count > 0)
+    {
+        @foreach (var item in Products)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <ItemComponent Product="@item"></ItemComponent>
+            </div>
+        }
+    }
+    else {
+        <p>Product product found</p>
+    }
+</div>
+
+@code
+{
+    [Parameter]
+    public List<ProductDto> Products { get; set; } = new();
+}

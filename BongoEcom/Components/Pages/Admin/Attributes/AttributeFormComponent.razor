@@ -1,0 +1,56 @@
+﻿@page "/admin/attributes/create";
+@using Application.Features.Attributes.Commands
+@rendermode InteractiveServer
+
+<FluentCard>
+
+    <h3>Create Attribute</h3>
+
+    <EditForm Model="@Command" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="Command.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label for="inputType" class="form-label">Input Type</label>
+            <InputText id="inputType" class="form-control" @bind-Value="Command.InputType" />
+        </div>
+
+        <div class="mb-3">
+            <label for="dataType" class="form-label">Data Type</label>
+            <InputText id="dataType" class="form-control" @bind-Value="Command.DataType" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Create</button>
+        <button class="btn btn-secondary ms-2" type="button" @onclick="@(() => Navigation.NavigateTo("/admin/attributes"))">Cancel</button>
+
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <div class="alert alert-info mt-3">@Message</div>
+        }
+    </EditForm>
+</FluentCard>
+
+@code {
+    private CreateAttributeCommand Command = new();
+    private string Message = string.Empty;
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await _mediator.Send(Command);
+
+        if (result.IsSuccess)
+        {
+            Message = "Attribute created successfully!";
+            Navigation.NavigateTo("admin/attributes");
+        }
+        else
+        {
+            Message = result.Error ?? "Failed to create Attribute.";
+        }
+    }
+}

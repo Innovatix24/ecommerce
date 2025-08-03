@@ -1,0 +1,162 @@
+﻿
+@page "/admin/products"
+@using Application.Features.Categories.DTOs
+@using Application.Features.Products.Commands
+@using Application.Features.Products.DTOs
+@using Application.Features.Products.Queries
+@using BongoEcom.Components.Common
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons;
+
+@rendermode InteractiveServer
+
+@inject IWebHostEnvironment env
+
+<div class="card">
+    <div class="card-body">
+        <div style="display:flex; justify-content:space-between;">
+            <h3>Products</h3>
+            <FluentButton @onclick=@(() => Navigation.NavigateTo("admin/products/create")) Color="Color.Error">Create Product</FluentButton>
+        </div>
+
+        @if (IsLoading)
+        {
+            <Loading></Loading>
+        }
+        else if (products?.Count == 0)
+        {
+            <p><em>No products found.</em></p>
+        }
+        else
+        {
+            <div>
+                <FluentDataGrid Items="products?.AsQueryable()"
+                                TGridItem="ProductDto"
+                                Pagination="@pagination"
+                                RowSize="@rowSize"
+                                AutoItemsPerPage="true"
+                                Style="overflow-y:hidden;">
+                    <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" />
+                    <TemplateColumn Width="75px" Title="Image">
+                        <div>
+                            <OverlayImage ImageUrl="@context.FeatureImageUrl" Class="rounded me-2" Style="width: 60px; height: 60px;" />
+                        </div>
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.Tag)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.SalePrice)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.CategoryName)" Sortable="true" />
+                    <TemplateColumn Title="Action">
+                        <div style="display:flex;">
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                          Title="Edit"
+                                          OnClick="@(() => Edit(context.Id))" />
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                          Title="Delete"
+                                          Color="Color.Error"
+                                          OnClick="@(() => Delete(context))" />
+                        </div>
+                    </TemplateColumn>
+                </FluentDataGrid>
+                <FluentPaginator State="@pagination" />
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <div class="alert alert-info mt-3">@Message</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    DataGridRowSize rowSize = DataGridRowSize.Large;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+
+    private List<CategoryDto> Categories = new();
+
+    private bool IsLoading = false;
+    private string Message = string.Empty;
+
+    private List<ProductDto> products = new();
+
+    private bool showOverlay = false;
+    private string? currentImage;
+
+    void ShowImage(string imageUrl)
+    {
+        currentImage = imageUrl;
+        showOverlay = true;
+    }
+    Task CloseImage()
+    {
+        showOverlay = false;
+        currentImage = null;
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await LoadData();
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadData()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        await LoadProducts();
+        StateHasChanged();
+
+    }
+
+    private async Task LoadProducts()
+    {
+        var result = await _mediator.Send(new GetAllProductsQuery());
+        if (result.IsSuccess)
+        {
+            products = result.Data ?? new();
+        }
+        IsLoading = false;
+    }
+
+    private void Edit(int id) => Navigation.NavigateTo($"admin/products/edit/{id}");
+
+    private async Task Delete(ProductDto product)
+    {
+        var confirmed = await UIService.ShowConfirmationAsync("Delete", "Are you <b>sure</b> to delete?");
+
+        if(confirmed)
+        {
+            var response = await _mediator.Send(new DeleteProductCommand((short)product.Id));
+            if(response.IsSuccess)
+            {
+                DeleteProductImages(product.Images);
+                await UIService.ShowSuccessAsync("Product has been deleted");
+                await LoadProducts();
+            }
+        }
+    }
+
+    public void DeleteProductImages(List<ProductImageDto> productImages)
+    {
+        foreach (var image in productImages)
+        {
+            if (string.IsNullOrWhiteSpace(image.Url))
+                continue;
+
+            string relativePath = image.Url.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+            string fullPath = Path.Combine(env.WebRootPath, relativePath);
+
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+            }
+        }
+    }
+}

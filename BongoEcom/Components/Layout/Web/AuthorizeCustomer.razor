@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@inject AuthService Auth
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (isAuthorized)
+{
+    @ChildContent
+}
+else if (!isChecking)
+{
+    <p>Redirecting to login...</p>
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool isAuthorized = false;
+    private bool isChecking = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Auth.AuthUser is not null)
+        {
+            isAuthorized = true;
+        }
+        else
+        {
+            Navigation.NavigateTo($"/login", true);
+        }
+
+        isChecking = false;
+    }
+}

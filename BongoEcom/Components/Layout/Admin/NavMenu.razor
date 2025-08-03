@@ -1,0 +1,132 @@
+﻿@using Application.Features.MyApp.Menus.DTOs
+@using Application.Features.MyApp.Menus.Queries
+@using MediatR
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Icons = Microsoft.FluentUI.AspNetCore.Components.Icons
+
+@rendermode InteractiveServer
+
+@inject ISender _sender;
+
+<div class="navmenu" style="background:#FBFCFC; height:100vh">
+    @* <input type="checkbox" title="Menu expand/collapse toggle" id="navmenu-toggle" class="navmenu-icon" /> *@
+    <label for="navmenu-toggle" class="navmenu-icon"><FluentIcon Value="@(new Icons.Regular.Size20.Navigation())" Color="Color.Fill" /></label>
+    <nav class="sitenav scroll-container" style="height:95vh; overflow-x:hidden" aria-labelledby="main-menu" onclick="document.getElementById('navmenu-toggle').click();">
+        <FluentNavMenu Id="main-menu" Collapsible="true" Width="250" Title="Navigation menu" @bind-Expanded="expanded">
+
+            @* <FluentTextField Style="width : 100%;" @oninput=@HandleSearch AutoComplete="off" Placeholder="Search"></FluentTextField> *@
+
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <div class="box">
+                <div class="search-box">
+                    <input @oninput=@HandleSearch type="text" placeholder="Search here..">
+                    <label for="" class="icon">
+                        <i class="fas fa-search"></i>
+                    </label>
+                </div>
+            </div>
+
+            @if (filteredTree is null)
+            {
+                <FluentProgress></FluentProgress>
+            }
+            else
+            {
+                @foreach (var menu in filteredTree)
+                {
+                    if(menu.Children is null || menu.Children.Count == 0)
+                    {
+                        <FluentNavLink Href=@menu.Url Match="@NavLinkMatch.All" Icon="@(GetIcon(menu.IconName))" IconColor="Color.Accent">@menu.Title</FluentNavLink>
+                    }
+                    else
+                    {
+                        <FluentNavGroup Title=@menu.Title Icon="@(GetIcon(menu.IconName))">
+                            @foreach (var child in menu.Children)
+                            {
+                                if (child.Children is null || child.Children.Count == 0)
+                                {
+                                    <FluentNavLink Href=@child.Url Match="@NavLinkMatch.All" Icon="@(GetIcon(child.IconName))" IconColor="Color.Accent">@child.Title</FluentNavLink>
+                                }
+                                else
+                                {
+                                    <FluentNavGroup Title=@child.Title Icon="@(GetIcon(child.IconName))">
+                                        @foreach (var gchild in child.Children)
+                                        {
+                                            <FluentNavLink Href=@gchild.Url Match="@NavLinkMatch.All" Icon="@(GetIcon(gchild.IconName))" IconColor="Color.Accent">@gchild.Title</FluentNavLink>
+                                        }
+                                    </FluentNavGroup>
+                                }
+                            }
+                        </FluentNavGroup>
+                    }
+                }
+            }
+
+        </FluentNavMenu>
+    </nav>
+</div>
+
+@code {
+    private bool expanded = true;
+    private IconProvider iconProvider = IconProvider.Instance;
+    private List<NavigationMenuDto> menus = new();
+    private List<NavigationMenuDto> filteredTree = new();
+    private List<NavigationMenuDto> originalTree = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstTime)
+    {
+        if (firstTime)
+        {
+            var query = new GetApplicationMenusQuery();
+            var result = await _sender.Send(query);
+            if(result.IsSuccess)
+            {
+                menus = result.Data ?? new();
+                originalTree = MakeMenuTree(menus);
+                filteredTree = originalTree;
+                StateHasChanged();
+            }        
+        }
+
+        await base.OnAfterRenderAsync(firstTime);
+    }
+
+    private Icon GetIcon(string iconName)
+    {
+        return iconProvider.GetIcon(iconName);
+    }
+
+    private List<NavigationMenuDto> MakeMenuTree(List<NavigationMenuDto> menus)
+    {
+        var tree = new List<NavigationMenuDto>();
+        var roots = menus.Where(x=> x.ParentId == 0).ToList();
+        tree.AddRange(roots);
+
+        foreach(var parent in roots)
+        {
+            AddChildren(parent, menus);
+        }
+        return tree;
+    }
+
+    private void AddChildren(NavigationMenuDto parent, List<NavigationMenuDto> menus)
+    {
+        var children = menus.Where(x => x.ParentId == parent.Id).ToList();
+        if (children.Count == 0) return;
+        if (parent.Children is null) parent.Children = new();
+        parent.Children.AddRange(children);
+        foreach(var child in children)
+        {
+            AddChildren(child, menus);
+        }
+    }
+
+    private void HandleSearch(ChangeEventArgs e)
+    {
+        var searchKey = e.Value.ToString().Trim().ToLower();
+        var filteredMenus = FilterMenu(originalTree, searchKey);
+        filteredTree = filteredMenus;
+    }
+}
+
+

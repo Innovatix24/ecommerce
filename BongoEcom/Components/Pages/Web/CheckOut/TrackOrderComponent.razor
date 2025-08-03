@@ -1,0 +1,186 @@
+﻿@page "/track-order"
+
+@inject UIHelperService UIService
+
+<style>
+ .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background-color: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .track-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 40px;
+      justify-content: center;
+    }
+
+    .track-form input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .track-form button {
+      padding: 12px 20px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .track-form button:hover {
+      background-color: #0056b3;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-top: 40px;
+    }
+
+    .status-bar::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      right: 10%;
+      height: 4px;
+      background-color: #ccc;
+      z-index: 0;
+      transform: translateY(-50%);
+    }
+
+    .step {
+      position: relative;
+      text-align: center;
+      z-index: 1;
+      width: 25%;
+    }
+
+    .step .circle {
+      width: 30px;
+      height: 30px;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      background-color: #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .step.active .circle {
+      background-color: #28a745;
+    }
+
+    .step p {
+      font-size: 14px;
+    }
+
+    .timeline-container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+        border-left: 3px solid #007bff;
+    }
+
+    .timeline-event {
+        position: relative;
+        margin-bottom: 30px;
+        padding-left: 20px;
+    }
+
+        .timeline-event::before {
+            content: '';
+            position: absolute;
+            left: -11px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: #007bff;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #007bff;
+        }
+
+        .timeline-event h4 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .timeline-event p {
+            margin: 4px 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .timeline-event .timestamp {
+            font-size: 13px;
+            color: #999;
+        }
+  </style>
+
+<div class="container">
+    <h2>Track Your Order</h2>
+    <div class="track-form">
+        <input @bind-value=@OrderNo type="text" placeholder="Enter Order ID / Tracking Number" />
+        <button @onclick=@GetOrderHistory type="submit">Track</button>
+    </div>
+
+    @if(init || loading)
+    {
+
+    }
+    else
+    {
+        <div class="timeline-container">
+            @if (orderHistories.Count == 0)
+            {
+                <div>No order found with #@OrderNo</div>
+            }
+            else
+            {
+                <h2>Order #@OrderNo Timeline</h2>
+                <div class="timeline">
+                    @foreach (var item in orderHistories)
+                    {
+                        <div class="timeline-event">
+                            <h4>@(item.StatusEnum.ToString())</h4>
+                            <p>@item.GetNote()</p>
+                            <div class="timestamp">@(item.CreatedAt.ToString("MMMM dd, 2025 - hh:mm tt"))</div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

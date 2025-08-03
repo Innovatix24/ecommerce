@@ -1,0 +1,112 @@
+﻿@using Application.Features.Attributes.DTOs
+@using Application.Features.Products.Commands
+@using Application.Features.Products.DTOs
+@using BongoEcom.Components.Common
+@using BongoEcom.Services
+@rendermode InteractiveServer
+@inject IDialogService dialogueService
+@* @inject JSHelper js *@
+
+<FluentDialogFooter>
+    <FluentButton BackgroundColor="Green" Appearance="Appearance.Accent" OnClick="@AddItemAsync">Save</FluentButton>
+    <FluentButton BackgroundColor="OrangeRed" Appearance="Appearance.Accent" OnClick="@CancelAsync">Cancel</FluentButton>
+</FluentDialogFooter>
+
+<FluentDialogBody>
+    <div>
+        <FluentCombobox Items=@Attributes
+            Width="200px"
+            OptionText="@(i => i.Name)"
+            Label="Outlet"
+            SelectedOption="@Attribute"
+            SelectedOptionChanged="@(async x => SelectAttribute(x))"
+            Height="200px"
+            Disabled=@(Attributes == null)
+            Autocomplete="ComboboxAutocomplete.Both"
+            TOption="AttributeDto" />
+    </div>
+
+        <FluentTextField 
+            Label="Value"
+            Value="@(value.Value)"
+            AutoComplete="off"
+            @oninput=@HandleValueInput
+            @onkeyup=@HandleValueKeyUp/>
+
+    <div>
+        @foreach(var item in Values){
+            <ChipComponent Icon="bi bi-tag" OnRemove="() => RemoveTag(item)">
+                @(item.Value)
+            </ChipComponent>
+        }
+    </div>
+
+</FluentDialogBody>
+
+@code{
+    ProductAttributeValueDto value = new();
+    List<ProductAttributeValueDto> Values = new();
+    List<AttributeDto> Attributes = new();
+
+    AttributeDto? Attribute = new();
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await LoadAttributesAsync();
+
+            if(Content is not null){
+                Values = Content.Values;
+                Attribute = Attributes.Where(x => x.Id == Content.AttributeId).FirstOrDefault();
+            }
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void SelectAttribute(AttributeDto item)
+    {
+        Attribute = item;
+    }
+
+    private async void AddItemAsync()
+    {
+        if(Content == null || Content.Id == 0) 
+        {
+            Content = new();
+            Content.AttributeId = Attribute.Id;
+            Content.Name = Attribute.Name;
+            Content.Values = Values;
+        }
+        else
+        {
+            Content.Values = Values;
+        }
+
+        await Dialog.CloseAsync(Content);
+    }
+    private void CancelAsync()
+    {
+
+    }
+
+    private void RemoveTag(ProductAttributeValueDto item)
+    {
+        Values.Remove(item);
+    }
+
+    private void HandleValueInput(ChangeEventArgs e)
+    {
+        if (e.Value is null) return;
+        value.Value = e.Value.ToString();
+    }
+    private void HandleValueKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Values.Add(value);
+            value = new();
+        }
+    }
+}

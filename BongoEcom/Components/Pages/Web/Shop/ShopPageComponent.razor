@@ -1,0 +1,20 @@
+﻿@page "/shop/products"
+
+@using BongoEcom.Components.Pages.Web.Products
+
+
+@rendermode InteractiveServer
+@inject CategoryStateService State;
+
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3 col-lg-3 mb-4">
+            <CategoriesComponent></CategoriesComponent>
+        </div>
+        <div class="col-md-9 mb-4">
+            <ProductListComponent Products="@Products"></ProductListComponent>
+        </div>
+    </div>
+</div>
+

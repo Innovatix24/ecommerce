@@ -1,0 +1,55 @@
+﻿@page "/admin/coupons"
+@using Application.Features.Orders.Queries
+@inject NavigationManager Nav
+
+<div class="card">
+    <div class="card-body">
+
+        <h3>Coupons</h3>
+        <button class="btn btn-success mb-2" @onclick="CreateNew">Add New Coupon</button>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Type</th>
+                    <th>Value</th>
+                    <th>Used</th>
+                    <th>Max</th>
+                    <th>Expiry</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in coupons)
+                {
+                    <tr>
+                        <td>@c.Code</td>
+                        <td>@c.DiscountType</td>
+                        <td>@c.DiscountValue</td>
+                        <td>@c.UsageCount</td>
+                        <td>@c.MaxUsageCount</td>
+                        <td>@(c.ExpiryDate?.ToShortDateString() ?? "-")</td>
+                        <td>@(c.IsActive ? "✅" : "❌")</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" @onclick="() => Edit(c.Id)">Edit</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    List<CouponDto> coupons = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+
+    void Edit(int id) => Nav.NavigateTo($"/admin/coupons/edit/{id}");
+    void CreateNew() => Nav.NavigateTo("/admin/coupons/edit");
+}

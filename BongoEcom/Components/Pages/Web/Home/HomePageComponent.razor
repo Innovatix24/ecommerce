@@ -1,0 +1,40 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@inject CategoryStateService State;
+@inject ProductFilterService FilterService
+
+@using BongoEcom.Components.Common
+@using BongoEcom.Components.Pages.Web.Products
+@using BongoEcom.Components.Pages.Web.Shop
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <CategoriesComponent></CategoriesComponent>
+        </div>
+        <div class="col-md-9 mb-4">
+            @if (productLoading){
+                @* <Loading></Loading> *@
+            }
+            else 
+            {
+                if (PaginatedResult is not null){
+                    <ProductListComponent Products="@Products"></ProductListComponent>
+                    <PaginationComponent PageSize="PaginatedResult.PageSize"
+                        CurrentPage=@PaginatedResult.PageNumber 
+                        TotalCount="@PaginatedResult.TotalCount" 
+                        PageChanged="HandlePageChanged" />
+                }
+                else {
+                    <p>No Product found</p>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+
+@code {
+    
+}

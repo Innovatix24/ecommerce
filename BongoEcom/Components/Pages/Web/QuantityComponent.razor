@@ -1,0 +1,52 @@
+﻿
+<style>
+    .qty-button {
+        cursor: pointer;
+        height: 30px;
+        width: 30px;
+        border-radius: 10px;
+        background: rgb(221, 221, 221);
+        color: rgb(19, 17, 17);
+        font-weight: bolder;
+        text-align: center;
+        font-size: 20px;
+        margin: 5px;
+        /* padding: 5px; */
+        border: none;
+        outline: 0;
+    }
+
+    .qty {
+    font-size: 25px;
+    font-weight: bold;
+    }
+</style>
+
+<div style="display : flex; align-items:center; justify-content:left;">
+    <button class="qty-button" @onclick=@QtyDecrease>-</button>
+    <div class="qty">@qty</div>
+    <button class="qty-button" @onclick=@QtyIncrease>+</button>
+</div>
+
+@code {
+    [Parameter] public Action<int> OnChange { get; set; }
+
+    public int qty { get;set; } = 1;
+
+    private void QtyDecrease()
+    {
+        qty--;
+        if (qty == 0) qty = 1;
+        if(OnChange != null){
+            OnChange(qty);
+        }
+    }
+    private void QtyIncrease()
+    {
+        qty++;
+        if (OnChange != null)
+        {
+            OnChange(qty);
+        }
+    }
+}

@@ -1,0 +1,22 @@
+﻿@page "/dashboard"
+@using BongoEcom.Components.Layout.Web
+
+@* <AuthorizeCustomer> *@
+<div class="row">
+    <!-- Profile Info --> 
+    <div class="col-md-3">
+        <AccountSidebarComponent />
+    </div>
+
+    <div class="col-md-9">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <CustomerProfileComponent />
+                <CustomerOrdersComponent />
+                <CustomerAddressBookComponent />
+            </div>
+        </div>
+    </div>
+</div>
+@* </AuthorizeCustomer> *@
+

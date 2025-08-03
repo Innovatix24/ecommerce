@@ -1,0 +1,111 @@
+﻿@page "/admin/delivery-charges"
+@using Application.Features.Orders.Queries
+@using BongoEcom.Components.Common
+@inject ISender Mediator
+@inject NavigationManager Navigation
+
+<PageTitle>Delivery Charges</PageTitle>
+
+<div class="card">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between">
+            <h3 class="text-xl font-bold mb-4">Delivery Charges</h3>
+            <button class="mt-4 px-4 py-2 bg-success text-white rounded border-0" @onclick="CreateNew">+ Add Delivery Charge</button>
+        </div>
+
+        @if (loading)
+        {
+            <Loading/>
+        }
+        else
+        {
+            <FluentDataGrid Items="deliveryCharges?.AsQueryable()"
+            TGridItem="DeliveryChargeDto"
+            RowSize="@rowSize"
+            AutoItemsPerPage="true"
+            Style="overflow-y:hidden;">
+                <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" />
+                <PropertyColumn Property="@(c => c.AreaType)" Sortable="true" />
+                <PropertyColumn Property="@(c => $"{c.ChargeAmount} Tk")" Title="Amount" Align="Align.End"/>
+                <PropertyColumn Property="@(c => $"{c.FreeShippingThreshold} Tk")" Title="Free Shipping Over" Align="Align.End" />
+                <TemplateColumn Title="Action">
+                    <div style="display:flex;">
+                        <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                        Title="Edit"
+                        OnClick="@(() => Edit(context))" />
+                        <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                        Title="Delete"
+                        Color="Color.Error"
+                        OnClick="@(() => Delete(context.Id))" />
+                    </div>
+                </TemplateColumn>
+            </FluentDataGrid>
+
+        }
+    </div>
+</div>
+
+
+@code {
+    DataGridRowSize rowSize = DataGridRowSize.Medium;
+    private List<DeliveryChargeDto> deliveryCharges = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    bool loading = true;
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            await LoadData();
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadData()
+    {
+        loading = true;
+        var response = await _mediator.Send(new GetDeliveryChargesQuery());
+        loading = false;
+        if (response.IsSuccess)
+        {
+            deliveryCharges = response.Data ?? new();
+        }
+    }
+
+    private void Edit(DeliveryChargeDto id)
+    {
+        Navigation.NavigateTo($"/admin/delivery-charges/edit/{id}");
+    }
+    private void Delete(DeliveryChargeDto id)
+    {
+        Navigation.NavigateTo($"/admin/delivery-charges/edit/{id}");
+    }
+
+    private void CreateNew()
+    {
+        Navigation.NavigateTo("/admin/delivery-charges/create");
+    }
+
+    private async Task Delete(short id)
+    {
+        // var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this delivery charge?");
+        // if (!confirmed) return;
+
+        // var result = await Mediator.Send(new DeleteDeliveryChargeCommand { Id = id });
+        // if (result.Succeeded)
+        // {
+        //     deliveryCharges = await Mediator.Send(new GetAllDeliveryChargesQuery());
+        //     StateHasChanged();
+        // }
+        // else
+        // {
+        //     // handle error, show toast or alert
+        // }
+    }
+}

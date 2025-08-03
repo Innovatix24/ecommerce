@@ -1,0 +1,33 @@
+﻿@page "/admin/dashboard"
+@using Application.Features.Orders.Queries
+@using BongoEcom.Components.Common
+
+@rendermode InteractiveServer
+
+<PageTitle>Admin Dashboard</PageTitle>
+
+<div class="card p-4">
+    <h2 class="mb-3">🛒 Dashboard</h2>
+    <card class="p-2 mb-3" style="width: 100%; height:auto;">
+        @if(detailLoading){
+            <Loading Message="Details loading..."/>
+        }
+        else {
+            <FluentStack Wrap="true">
+                <InfoCardComponent Title="Total Order" Value="@Detail.TotalOrder" />
+                <InfoCardComponent Title="Pending Order" Value="@Detail.PendingOrder" />
+                <InfoCardComponent Title="Cancelled" Value="@Detail.CancelledOrder" />
+                <InfoCardComponent Title="Delivered" Value="@Detail.DeliveredOrder" />
+                <InfoCardComponent Title="Returned" Value="@Detail.ReturnedOrder" />
+                <InfoCardComponent Title="Total Products" Value="@Detail.TotalProducts" />
+            </FluentStack>
+        }
+    </card>
+
+    <FluentDivider />
+    <RecentOrdersComponent/>
+</div>
+
+@code {
+    
+}
