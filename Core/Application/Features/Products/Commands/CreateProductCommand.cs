@@ -69,7 +69,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Result
             {
                 var attribute = new ProductAttribute
                 {
-                    AttributeId = item.Id,
+                    AttributeId = item.AttributeId,
                     ProductId = product.Id,
                     Values = item.Values.Select(x=> new ProductAttributeValue
                     {

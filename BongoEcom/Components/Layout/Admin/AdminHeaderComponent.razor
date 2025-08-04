@@ -1,45 +1,85 @@
-﻿
+﻿@using Infrastructure.Identity
+@using Microsoft.AspNetCore.Identity
+@rendermode InteractiveServer
+
 <style>
 
     .dashboard-header {
-        font-family: 'Segoe UI', sans-serif;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height: 45px;
-        background: orange;
-        color: white;
-        padding: 15px 30px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px;
+    background: orange;
+    color: white;
+    padding: 15px 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
-        .dashboard-header h2 {
-            margin: 0;
-            font-size: 24px;
-        }
+    .dashboard-header h2 {
+    margin: 0;
+    font-size: 24px;
+    }
 
     .logout-button {
-        background-color: white;
-        color: #007bff;
-        padding: 8px 16px;
-        font-size: 14px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.2s ease;
+    background-color: white;
+    color: #007bff;
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
     }
 
-        .logout-button:hover {
-            background-color: #e6e6e6;
-        }
+    .logout-button:hover {
+    background-color: #e6e6e6;
+    }
 </style>
 
 <div class="dashboard-header">
     <h2>🛍️ E-Commerce</h2>
-    <button class="logout-button" onclick="logout()">Logout</button>
+
+    <div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <form action="Account/Logout" method="post">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                        <button type="submit" class="nav-link">
+                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        </button>
+                    </form>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
 </div>
 
 @code {
+    private string? currentUrl;
 
+    protected override void OnInitialized()
+    {
+        currentUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = Navigation.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 }

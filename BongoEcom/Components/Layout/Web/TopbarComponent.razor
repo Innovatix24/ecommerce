@@ -1,6 +1,7 @@
 ﻿@using Application.Features.CompanyInfoes.Queries
 @using BongoEcom.Components.Pages.Web.Cart
 @using BongoEcom.Services
+@using Microsoft.AspNetCore.Components.Authorization
 
 @rendermode InteractiveServer
 
@@ -33,9 +34,9 @@
     </div>
     <div class="d-flex align-items-center gap-2">
         <button @onclick="@(() => PlaceOrder())" class="btn btn-outline-danger">ORDER NOW</button>
-        @if(Auth.AuthUser is null){
-            <a class="btn btn-danger" href="/login">LOGIN</a>
-        }
+        
+        <WebTopBar></WebTopBar>
+
         <button @onclick="@(() => ShowModal())" class="btn btn-outline-dark cart-btn">
             <i class="fas fa-shopping-cart" style="color:darkorange"></i> ৳ @(CartService.GetTotalPrice())
         </button>
@@ -58,12 +59,17 @@
 
 @code {
     CompanyInfoDto CompanyInfo = new();
+    bool rendered = false;
+
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         if(firstRender)
         {
             await companyService.Load();
             CompanyInfo = companyService.CompanyInfo ?? new();
+
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+
             StateHasChanged();
         }
         await base.OnAfterRenderAsync(firstRender);
@@ -79,12 +85,16 @@
     {
         CartService.OnChange += StateHasChanged;
         Auth.OnChange += StateHasChanged;
+
+        currentUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
+        Navigation.LocationChanged += OnLocationChanged;
     }
 
     public void Dispose()
     {
         CartService.OnChange -= StateHasChanged;
         Auth.OnChange -= StateHasChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 
     private async Task ShowModal()
@@ -96,4 +106,14 @@
     {
         Navigation.NavigateTo("/checkout");
     }
+
+    private string? currentUrl;
+
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = Navigation.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
 }

@@ -1,4 +1,6 @@
 ﻿@page "/admin/delivery-charges"
+@rendermode InteractiveServer
+
 @using Application.Features.Orders.Queries
 @using BongoEcom.Components.Common
 @inject ISender Mediator
@@ -56,7 +58,7 @@
 
     }
 
-    bool loading = true;
+    bool loading = false;
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         if(firstRender)
