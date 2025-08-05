@@ -1,10 +1,5 @@
 ﻿
-
-using Domain.Entities.Auth;
-using System;
-
 namespace Domain.Entities.Orders;
-
 public enum DiscountType { Fixed, Percent }
 
 public class Coupon : Entity<short>

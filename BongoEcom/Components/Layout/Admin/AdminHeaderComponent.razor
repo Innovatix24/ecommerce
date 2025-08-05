@@ -2,6 +2,8 @@
 @using Microsoft.AspNetCore.Identity
 @rendermode InteractiveServer
 
+@inject IAuthUserService authService;
+
 <style>
 
     .dashboard-header {
@@ -66,10 +68,15 @@
 @code {
     private string? currentUrl;
 
-    protected override void OnInitialized()
+    protected async override void OnInitialized()
     {
         currentUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
         Navigation.LocationChanged += OnLocationChanged;
+
+        authService.LoadUserAuth();
+
+        var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = auth.User;
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)

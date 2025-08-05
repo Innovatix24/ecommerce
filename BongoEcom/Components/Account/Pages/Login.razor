@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using Infrastructure.Identity
+@using System.Security.Claims
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
@@ -95,6 +96,15 @@
 
             var user = await UserManager.FindByEmailAsync(Input.Email);
             var roles = await UserManager.GetRolesAsync(user);
+
+            var claims = new List<Claim>
+                {
+                    new Claim("UserId", user.UserId.ToString()),
+                    new Claim("Name", "Admin"),
+                };
+
+            await UserManager.AddClaimsAsync(user, claims);
+            await SignInManager.RefreshSignInAsync(user);
 
             if (roles.Contains("SuperAdmin") || roles.Contains("Admin"))
             {

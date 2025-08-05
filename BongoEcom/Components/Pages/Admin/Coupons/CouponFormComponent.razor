@@ -1,11 +1,15 @@
-﻿@using Application.Features.Orders.Queries
+﻿@page "/admin/coupons/edit/{CouponId:int}"
+@page "/admin/coupons/create"
+
+@rendermode InteractiveServer
+
+@using Application.Features.Coupons.Commands
+@using Application.Features.Coupons.Queries
+@using Application.Features.Orders.Queries
 
 @inject NavigationManager Nav
 
-<EditForm Model="coupon" OnValidSubmit="Save">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-
+<div class="card p-4" style="min-height:90%;">
     <div class="form-group">
         <label>Code</label>
         <InputText class="form-control" @bind-Value="coupon.Code" />
@@ -43,9 +47,11 @@
         <InputCheckbox @bind-Value="coupon.IsActive" /> Active
     </div>
 
-    <button type="submit" class="btn btn-primary">Save</button>
-    <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancel</button>
-</EditForm>
+    <div class="d-flex">
+        <button type="submit" class="btn btn-primary" @onclick="Save">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancel</button>
+    </div>
+</div>
 
 @code {
     [Parameter] public int? CouponId { get; set; }
@@ -53,12 +59,48 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (CouponId.HasValue) ;
+        if (CouponId.HasValue)
+        {
+            if(CouponId != 0)
+            {
+                var query = new GetCouponByIdQuery((short)CouponId);
+                var result = await _mediator.Send(query);
+                if(result.IsSuccess)
+                {
+                    coupon = result.Data ?? new();
+                }
+            }
+        }
     }
 
     private async Task Save()
     {
-        Nav.NavigateTo("/admin/coupons");
+        var command = new CreateCouponCommand()
+        {
+            Id = coupon.Id,
+            Code = coupon.Code,
+            DiscountType = (byte)coupon.DiscountType,
+            MinimumPurchaseAmount = coupon.MinimumPurchaseAmount,
+            DiscountValue = coupon.DiscountValue,
+            MaxUsageCount = coupon.MaxUsageCount,
+            UsageCount = 0,
+            ExpiryDate = coupon.ExpiryDate,
+            IsActive = coupon.IsActive,
+        };
+        UIService.ShowLoader();
+        var result = await _mediator.Send(command);
+        UIService.HideLoader();
+
+        if(result.IsSuccess)
+        {
+            await UIService.ShowSuccessAsync("Coupon saved");
+            await Task.Delay(100);
+
+            Nav.NavigateTo("/admin/coupons");
+        }
+        else {
+            await UIService.ShowErrorAsync(result.Error);
+        }
     }
 
     void GoBack() => Nav.NavigateTo("/admin/coupons");

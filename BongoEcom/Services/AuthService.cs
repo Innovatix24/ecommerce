@@ -1,7 +1,60 @@
 ﻿using Application.Auth.DTOs;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using System.Security.Claims;
 
 namespace BongoEcom.Services;
+public class AuthUser
+{
+    public string Id { get; set; }
+    public string UserName { get; set; }
+    public string Email { get; set; }
+    public bool Authenticated { get; set; }
+    public short UserId { get; set; }
+}
+
+public interface IAuthUserService
+{
+    AuthUser? User { get; set; }
+    bool Authenticated { get; set; }
+    void LoadUserAuth();
+}
+
+public class AuthUserService : IAuthUserService
+{
+    public AuthUser? User { get; set; }
+    public bool Authenticated { get; set; }
+
+    private readonly AuthenticationStateProvider _authStateProvider;
+
+    public AuthUserService(AuthenticationStateProvider authStateProvider)
+    {
+        _authStateProvider = authStateProvider;
+    }
+
+    public async void LoadUserAuth()
+    {
+        var state = await _authStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        var userAuthInfo = new AuthUser
+        {
+            Authenticated = user.Identity?.IsAuthenticated ?? false
+        };
+
+        if (userAuthInfo.Authenticated)
+        {
+            userAuthInfo.Id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            userAuthInfo.UserName = user.FindFirst(ClaimTypes.Name)?.Value;
+            var userIdStr = user.FindFirst("UserId")?.Value;
+            short.TryParse(userIdStr, out short userId);
+            userAuthInfo.UserId = userId;
+            userAuthInfo.Email = user.FindFirst(ClaimTypes.Email)?.Value;
+        }
+
+        User =  userAuthInfo;
+    }
+}
+
 
 public class AuthService
 {

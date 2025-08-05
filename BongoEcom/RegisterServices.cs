@@ -25,6 +25,7 @@ public static class RegisterServices
         builder.Services.AddScoped<IdentityRedirectManager>();
         builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
         builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+        builder.Services.AddScoped<IAuthUserService, AuthUserService>();
 
         builder.Services.AddMediatR(cfg =>
         {

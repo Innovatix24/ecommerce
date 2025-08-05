@@ -31,8 +31,9 @@ public static class IdentitySeeder
             var user = new ApplicationUser
             {
                 UserId = 1,
-                UserName = email,
+                UserName = "systemadmin",
                 Email = email,
+                PhoneNumber = "01743920880",
                 EmailConfirmed = true
             };
 
