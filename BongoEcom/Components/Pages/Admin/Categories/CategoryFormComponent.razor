@@ -4,6 +4,9 @@
 @using Application.Features.Categories.Queries
 @rendermode InteractiveServer
 
+@inject IDialogService dialogueService
+
+
 <h3>Create Category</h3>
 
 <EditForm Model="@Command" OnValidSubmit="HandleValidSubmit">

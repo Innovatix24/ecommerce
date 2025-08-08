@@ -1,53 +1,53 @@
 ﻿@page "/admin/attributes";
+@using Application.Features.Attributes.DTOs
 @rendermode InteractiveServer
 
+@inject IDialogService DialogService;
 
-<FluentCard>
-    <h3>Attribute List</h3>
+<div class="card">
+    <div class="card-body">
+        <div style="display:flex; justify-content:space-between;">
+            <h3>Attribute List</h3>
+            <FluentButton @onclick=@CreateItem Color="White" BackgroundColor="Teal">Create Attribute</FluentButton>
+        </div>
 
-    <button @onclick=@(() => Navigation.NavigateTo("admin/attributes/create"))>Create Attribute</button>
-
-    @if (IsLoading)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else if (Attributes?.Count == 0)
-    {
-        <p><em>No categories found.</em></p>
-    }
-    else
-    {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Input type</th>
-                    <th>Data Type</th>
-                    <th style="width:150px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var attr in Attributes)
-                {
-                    <tr>
-                        <td>@attr.Name</td>
-                        <td>@attr.InputType</td>
-                        <td>@attr.DataType</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" @onclick="@(() => EditAttribute(attr.Id))">Edit</button>
-                            <button class="btn btn-sm btn-danger" @onclick="@(() => DeleteAttribute(attr.Id))">Delete</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-
-    @if (!string.IsNullOrEmpty(Message))
-    {
-        <div class="alert alert-info mt-3">@Message</div>
-    }
-
-</FluentCard>
+        @if (IsLoading)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else if (Attributes?.Count == 0)
+        {
+            <p><em>No categories found.</em></p>
+        }
+        else
+        {
+            <div style="height:85vh;">
+                <FluentDataGrid Items="Attributes?.AsQueryable()"
+                                TGridItem="AttributeDto"
+                                Pagination="@pagination"
+                                RowSize="@rowSize"
+                                AutoItemsPerPage="true"
+                                Style="overflow-y:hidden;">
+                    <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.InputType)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.DataType)" Sortable="true" />
+                    <TemplateColumn Title="Action">
+                        <div style="display:flex;">
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                          Title="Edit"
+                                          OnClick="@(() => EditItem(context))" />
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                          Title="Delete"
+                                          Color="Color.Error"
+                                          OnClick="@(() => DeleteAttribute(context.Id))" />
+                        </div>
+                    </TemplateColumn>
+                </FluentDataGrid>
+                <FluentPaginator State="@pagination" />
+            </div>
+        }
+    </div>
+</div>
 
 

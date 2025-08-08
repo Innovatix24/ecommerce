@@ -2,6 +2,7 @@
 using Application.Features.Attributes.DTOs;
 using Application.Features.Attributes.Queries;
 using Microsoft.AspNetCore.Components;
+using Microsoft.FluentUI.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace BongoEcom.Components.Pages.Admin.Attributes;
@@ -13,6 +14,9 @@ public partial class AttributesPage
     private List<AttributeDto> Attributes = new();
     private bool IsLoading = true;
     private string Message = string.Empty;
+
+    DataGridRowSize rowSize = DataGridRowSize.Medium;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,8 +56,35 @@ public partial class AttributesPage
         }
     }
 
-    private void EditAttribute(short id)
+    public async void CreateItem()
     {
-        Message = $"Edit logic for category ID {id} would go here.";
+        OpenModal("Create Category");
+    }
+
+    public async void EditItem(AttributeDto item)
+    {
+        OpenModal("Edit Category", item);
+    }
+    public async void OpenModal(string title, AttributeDto? item = null)
+    {
+        DialogParameters parameters = new()
+        {
+            Title = title,
+            PrimaryAction = "Yes",
+            PrimaryActionEnabled = false,
+            SecondaryAction = "No",
+            Width = "450px",
+            TrapFocus = false,
+            Modal = false,
+            PreventScroll = true
+        };
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<AttributeFormModal>(item, parameters);
+        DialogResult? result = await dialog.Result;
+        if (result.Data is not null)
+        {
+            await LoadAttributesAsync();
+            StateHasChanged();
+        }
     }
 }

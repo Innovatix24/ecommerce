@@ -1,11 +1,14 @@
 ﻿@page "/admin/users"
 @rendermode InteractiveServer
 @inject IDialogService DialogService;
+@inject UserManager<ApplicationUser> userManager
 
 @using Application.Auth.DTOs
 @using Application.Features.Orders.Commands
 @using Application.Features.Orders.DTOs
 @using Application.Features.Orders.Queries
+@using Infrastructure.Identity
+@using Microsoft.AspNetCore.Identity
 @using Shared.Enums
 
 <h3>Order Management</h3>

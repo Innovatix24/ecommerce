@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.FluentUI.AspNetCore.Components;
 using Shared.Enums;
 using BongoEcom.Components.Pages.Admin.Orders;
+using Microsoft.AspNetCore.Identity;
 
 namespace BongoEcom.Components.Pages.Admin.Users;
 
@@ -23,17 +24,33 @@ public partial class AdminUsersComponents
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
-        var result = await _mediator.Send(new GetAllUsersQuery());
-        if (result.IsSuccess)
-        {
-            Users = result.Data ?? new();
-        }
+        LoadUsers();
         IsLoading = false;
 
         foreach (var item in Enum.GetValues<OrderStatus>())
         {
             StatusList.Add(item);
         }
+    }
+
+    //private void LoadUsers()
+    //{
+    //    var result = await _mediator.Send(new GetAllUsersQuery());
+    //    if (result.IsSuccess)
+    //    {
+    //        Users = result.Data ?? new();
+    //    }
+    //}
+
+    private void LoadUsers()
+    {
+        var users = userManager.Users.Select(c => new UserDto
+        {
+            Id = c.UserId,
+            UserName = c.UserName,
+            FullName = c.UserName,
+            Email = c.Email ?? "",
+        }).ToList();
     }
 
     private async Task UpdateOrderStatusAsync(OrderDto order)

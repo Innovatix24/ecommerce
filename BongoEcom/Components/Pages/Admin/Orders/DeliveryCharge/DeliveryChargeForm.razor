@@ -1,0 +1,25 @@
+﻿@using Application.Features.Orders.Queries
+
+@rendermode InteractiveServer
+
+<FluentDialogFooter>
+    <FluentButton BackgroundColor="Teal" Appearance="Appearance.Accent" OnClick="@(() => HandleValidSubmit())">Save</FluentButton>
+    @* <FluentButton BackgroundColor="OrangeRed" Appearance="Appearance.Accent" OnClick="@(() => CancelAsync())">Cancel</FluentButton> *@
+</FluentDialogFooter>
+
+<FluentDialogBody>
+    <div class="form-group">
+        <label>Title</label>
+        <InputText class="form-control" @bind-Value="Content.AreaType" />
+    </div>
+
+    <div class="form-group">
+        <label>Amount</label>
+        <InputNumber class="form-control" @bind-Value="Content.ChargeAmount" />
+    </div>
+
+    <div class="form-group">
+        <label>Discount Value</label>
+        <InputNumber class="form-control" @bind-Value="Content.FreeShippingThreshold" />
+    </div>
+</FluentDialogBody>

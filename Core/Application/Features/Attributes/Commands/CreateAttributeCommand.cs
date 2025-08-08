@@ -7,9 +7,11 @@ namespace Application.Features.Attributes.Commands;
 
 public class CreateAttributeCommand : IRequest<Result<short>>
 {
+    public short Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string DataType { get; set; } = string.Empty;
     public string InputType { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 }
 
 public class CreateAttributeCommandHandler : IRequestHandler<CreateAttributeCommand, Result<short>>

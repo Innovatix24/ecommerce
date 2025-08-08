@@ -1,0 +1,50 @@
+﻿
+@using Application.Features.Attributes.Commands
+@rendermode InteractiveServer
+
+@inject IDialogService DialogService;
+
+<FluentDialogFooter>
+    <FluentButton BackgroundColor="Green" Appearance="Appearance.Accent" OnClick="@(() => HandleValidSubmit())">Save</FluentButton>
+</FluentDialogFooter>
+
+<FluentDialogBody>
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <InputText id="name" class="form-control" @bind-Value="Content.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label for="inputType" class="form-label">Input Type</label>
+        <InputText id="inputType" class="form-control" @bind-Value="Content.InputType" />
+    </div>
+
+    <div class="mb-3">
+        <label for="dataType" class="form-label">Data Type</label>
+        <InputText id="dataType" class="form-control" @bind-Value="Content.DataType" />
+    </div>
+</FluentDialogBody>
+
+
+
+
+@code {
+    private async Task HandleValidSubmit()
+    {
+        var command = new CreateAttributeCommand
+        {
+            Id = Content.Id,
+            Name = Content.Name,
+            DataType = Content.DataType,
+            InputType = Content.InputType,
+        };
+
+        var response = await _mediator.Send(command);
+
+        if (response.IsSuccess)
+        {
+            await Dialog.CloseAsync("Saved successfully");
+            await UIService.ShowSuccessAsync("Saved successfully");
+        }
+    }
+}
