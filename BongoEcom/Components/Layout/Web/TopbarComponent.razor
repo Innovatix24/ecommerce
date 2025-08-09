@@ -23,9 +23,9 @@
 
 <div class="top-bar d-flex justify-content-between align-items-center px-3">
     <div class="d-flex align-items-center px-3">
-        <img src="@CompanyInfo.LogoUrl" alt="Royal Fruitz" style="height: 40px; margin-right:12px;">
+        <img src="@CompanyInfo?.LogoUrl" alt="Innovatix" style="height: 40px; margin-right:12px;">
         <div>
-            <h4>@CompanyInfo.CompanyName</h4>
+            <h4>@CompanyInfo?.CompanyName</h4>
         </div>
     </div>
     <div class="input-group" style="width:350px;">
@@ -58,15 +58,16 @@
 </div>
 
 @code {
-    CompanyInfoDto CompanyInfo = new();
+    // CompanyInfoDto CompanyInfo = new();
+    [Parameter] public CompanyInfoDto? CompanyInfo { get; set; }
     bool rendered = false;
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         if(firstRender)
         {
-            await companyService.Load();
-            CompanyInfo = companyService.CompanyInfo ?? new();
+            // await companyService.Load();
+            // CompanyInfo = companyService.CompanyInfo ?? new();
 
             var auth = await AuthStateProvider.GetAuthenticationStateAsync();
 

@@ -1,11 +1,13 @@
-﻿
+﻿@using Application.Features.CompanyInfoes.Queries
+@inject CompanyInfoService companyService
+
 @inherits LayoutComponentBase
 
 <div class="page">
     <main>
         <div>
-            <TopbarComponent></TopbarComponent>
-            <NavbarComponent></NavbarComponent>
+            <TopbarComponent CompanyInfo="CompanyInfo"></TopbarComponent>
+            <NavbarComponent CompanyInfo="CompanyInfo"></NavbarComponent>
         </div>
         <div>
             @Body
@@ -15,3 +17,17 @@
         </div>
     </main>
 </div>
+
+@code 
+{
+    CompanyInfoDto CompanyInfo = new();
+    bool rendered = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await companyService.Load();
+        CompanyInfo = companyService.CompanyInfo ?? new();
+
+        Auth.OnChange += StateHasChanged;
+    }
+}

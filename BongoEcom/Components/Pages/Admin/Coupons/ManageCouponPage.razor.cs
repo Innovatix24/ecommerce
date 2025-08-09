@@ -16,10 +16,13 @@ public partial class ManageCouponPage
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    bool loading = false;
     private async Task LoadData()
     {
         var query = new GetCouponsQuery();
+        loading = true;
         var response = await _mediator.Send(query);
+        loading = false;
         if (response.IsSuccess)
         {
             coupons = response.Data ?? new();

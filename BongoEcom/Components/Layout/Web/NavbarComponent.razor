@@ -6,13 +6,13 @@
 
 <style>
     .nav-green {
-        background-color: #ff9f00;
+    background-color: #ff9f00;
     }
 
-        .nav-green a {
-            color: white !important;
-            font-weight: bold;
-        }
+    .nav-green a {
+    color: white !important;
+    font-weight: bold;
+    }
 </style>
 
 <nav class="navbar navbar-expand-lg nav-green px-3">
@@ -22,7 +22,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-@*                 <li class="nav-item dropdown">
+                @*                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">ALL CATEGORIES</a>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="#">Category 1</a></li>
@@ -39,7 +39,7 @@
                 }
             </ul>
             <div class="text-white d-flex align-items-center gap-2">
-                <i class="fas fa-envelope"></i> CONTACT: <strong>@CompanyInfo.MobileNumber</strong>
+                <i class="fas fa-envelope"></i> CONTACT: <strong>@CompanyInfo?.MobileNumber</strong>
             </div>
         </div>
     </div>
@@ -47,20 +47,24 @@
 
 @code {
 
-    CompanyInfoDto CompanyInfo = new();
+    [Parameter] public CompanyInfoDto? CompanyInfo { get; set; }
+    // CompanyInfoDto CompanyInfo = new();
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await companyService.Load();
-            CompanyInfo = companyService.CompanyInfo ?? new();
+            // await companyService.Load();
+            // CompanyInfo = companyService.CompanyInfo ?? new();
             StateHasChanged();
         }
         await base.OnAfterRenderAsync(firstRender);
     }
 
-    protected override void OnInitialized()
+    protected async override Task OnInitializedAsync()
     {
+        await companyService.Load();
+        CompanyInfo = companyService.CompanyInfo ?? new();
+
         Auth.OnChange += StateHasChanged;
     }
 

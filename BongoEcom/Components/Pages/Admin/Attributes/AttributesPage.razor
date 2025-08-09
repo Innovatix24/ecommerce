@@ -4,6 +4,9 @@
 
 @inject IDialogService DialogService;
 
+
+@attribute [Authorize(Roles = "Admin,SuperAdmin")]
+
 <div class="card">
     <div class="card-body">
         <div style="display:flex; justify-content:space-between;">

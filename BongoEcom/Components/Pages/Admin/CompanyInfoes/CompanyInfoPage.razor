@@ -7,6 +7,8 @@
 @inject IWebHostEnvironment env
 @inject IToastService tostService
 
+@* @attribute [Authorize(Roles = "Admin,SuperAdmin")] *@
+
 <FluentCard AreaRestricted="false">
     <h3>Company Info</h3>
 
@@ -88,7 +90,7 @@
 
         if(response.IsSuccess)
         {
-            tostService.ShowSuccess("Changes are saved");
+            await UIService.ShowSuccessAsync("Saved");
         }
         else
         {

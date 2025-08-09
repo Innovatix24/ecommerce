@@ -8,6 +8,8 @@
 @inject IDialogService DialogService;
 @inject NavigationManager Navigation
 
+@attribute [Authorize(Roles = "Admin,SuperAdmin")]
+
 <PageTitle>Delivery Charges</PageTitle>
 
 <div class="card">

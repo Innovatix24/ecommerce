@@ -83,10 +83,15 @@ else
                     <strong>Subtotal:</strong>
                     <span>৳ @Order.SubTotal</span>
                 </div>
-                <div class="d-flex justify-content-between">
-                    <strong>Discount:</strong>
-                    <span style="color:orangered;"> - ৳ @Order.Discount</span>
-                </div>
+
+                @if(Order.Discount > 0)
+                {
+                    <div class="d-flex justify-content-between">
+                        <strong>Discount:</strong>
+                        <span style="color:orangered;"> - ৳ @Order.Discount</span>
+                    </div>
+                }
+
                 <div class="d-flex justify-content-between">
                     <strong>Delivery Charge:</strong>
                     <span>৳ @Order.DeliveryCharge</span>

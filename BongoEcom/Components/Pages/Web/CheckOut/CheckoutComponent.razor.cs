@@ -1,6 +1,7 @@
 ﻿
 using Application.Features.Orders.Queries;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace BongoEcom.Components.Pages.Web.CheckOut;
 
@@ -99,7 +100,7 @@ public partial class CheckoutComponent
             order.Discount = Discount;
         }
         
-        var confirmed = await alertService.ConfirmAsync("Confirm", "Are you sure to place order?");
+        var confirmed = await _jsRuntime.InvokeAsync<bool>("confirm", "Are you sure to place order?");
 
         if (!confirmed)
         {

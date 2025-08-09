@@ -10,6 +10,8 @@
 @inject IWebHostEnvironment env
 @inject IToastService toastService
 
+@attribute [Authorize(Roles = "Admin,SuperAdmin")]
+
 <div style="border-radius: 10px; padding:12px; background-color: white;">
     <div class="container">
         <h3>Create Product</h3>
