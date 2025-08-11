@@ -31,7 +31,7 @@ public class CartItemModel
     }
 }
 
-public class CartService(SweetAlertService SAlert)
+public class CartService(SweetAlertService SAlert, UIHelperService UIService)
 {
     private List<CartItemModel> items = new();
     private SweetAlertService alertService = SAlert;
@@ -48,7 +48,8 @@ public class CartService(SweetAlertService SAlert)
 
         if (existingItem != null)
         {
-            await alertService.ShowErrorAsync("Already added");
+            UIService.ErrorToastMessage("Already added");
+            //await alertService.ShowErrorAsync("Already added");
             return false;
         }
         else
@@ -69,7 +70,7 @@ public class CartService(SweetAlertService SAlert)
             };
             items.Add(item);
         }
-        await alertService.ShowSuccessAsync("Product is added to cart");
+        UIService.SuccessToastMessage("Product is added to cart");
         NotifyStateChanged();
         return true;
     }

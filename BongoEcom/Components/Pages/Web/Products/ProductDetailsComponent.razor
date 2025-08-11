@@ -6,7 +6,6 @@
 @rendermode InteractiveServer
 
 @inject CartService cartService
-@inject SweetAlertService SAlert
 
 <div class="container">
     <h3 class="mt-4">@Product?.Name</h3>
@@ -166,23 +165,6 @@
         }
         if (Product is null) return;
         var added = await cartService.AddProduct(Product, attributes: attributes, qty: qty);
-
-        // int imageId = 0;
-
-        // var firstImage = Product.Images.FirstOrDefault();
-        // if (firstImage is not null) imageId = firstImage.Id;
-
-        // var item = new CartItemModel
-        //     {
-        //         Id = Product.Id,
-        //         Name = Product.Name,
-        //         Rate = Product.SalePrice,
-        //         Qty = qty,
-        //         ImageUrl = Product.FeatureImageUrl,
-        //         ImageId = imageId,
-        //         Attributes = attributes,
-        //     };
-        // cartService.AddItem(item);
     }
 }
 

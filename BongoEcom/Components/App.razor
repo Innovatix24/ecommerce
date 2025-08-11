@@ -16,7 +16,6 @@
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet />
-
 </head>
 
 <body>
@@ -39,7 +38,8 @@
     </div>
 
     <script src="/jsHelper.js"></script>
-
+    <script src="/js/bootstrap.modal.js"></script>
+    
     <script>
         window.loader = {
             show: function (message) {
@@ -53,29 +53,7 @@
         };
     </script>
 
-    <script>
-        window.bootstrapInterop = {
-          showModal: (selector) => {
-            const myModal = new bootstrap.Modal(document.querySelector(selector));
-            myModal.show();
-          },
-          hideModal: (selector) => {
-            const myModal = bootstrap.Modal.getInstance(document.querySelector(selector));
-            if (myModal) myModal.hide();
-          }
-        };
 
-        window.initSidebarToggle = () => {
-            const toggleButton = document.getElementById("sidebarToggle");
-            const wrapper = document.getElementById("wrapper");
-
-            if (toggleButton) {
-                toggleButton.addEventListener("click", () => {
-                    wrapper.classList.toggle("toggled");
-                });
-            }
-        };
-    </script>
     <script>
         function openPdfInNewTab(base64Pdf) {
             // Create a blob from the base64 data
@@ -95,14 +73,16 @@
             setTimeout(() => URL.revokeObjectURL(url), 10000);
         }
     </script>
+    @* <script src="/lib/bootstrap/dist/js/bootstrap.bundle.js"></script> *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/imageUploader.js"></script>
-    <script src="/bootstrap/bootstrap.bundle.min.js"></script>
     <script src="_framework/blazor.web.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
     <script src="site/sweet-alert.js"></script>
     <script src="_content/Blazored.TextEditor/quill-blot-formatter.min.js"></script>
     <script src="_content/Blazored.TextEditor/Blazored-BlazorQuill.js"></script>
+
+    <script src="js/site.js"></script>
 </body>
 </html>
