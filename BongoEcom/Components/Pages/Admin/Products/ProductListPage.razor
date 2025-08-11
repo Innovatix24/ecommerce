@@ -37,7 +37,10 @@
                                 RowSize="@rowSize"
                                 AutoItemsPerPage="true"
                                 Style="overflow-y:hidden;">
-                    <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" />
+                    @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
+                    <TemplateColumn Width="60px" Title="Sl">
+                        <p>@(products?.IndexOf(context) + 1)</p>
+                    </TemplateColumn>
                     <TemplateColumn Width="75px" Title="Image">
                         <div>
                             <OverlayImage ImageUrl="@context.FeatureImageUrl" Class="rounded me-2" Style="width: 60px; height: 60px;" />

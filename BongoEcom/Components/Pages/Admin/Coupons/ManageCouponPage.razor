@@ -27,7 +27,10 @@
             RowSize="@rowSize"
             AutoItemsPerPage="true"
             Style="overflow-y:hidden;">
-                <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" />
+                <TemplateColumn Width="60px" Title="Sl">
+                    <p>@(coupons?.IndexOf(context) + 1)</p>
+                </TemplateColumn>
+                @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
                 <PropertyColumn Property="@(c => c.Code)" Sortable="true" />
                 <PropertyColumn Property="@(c => c.DiscountType)" Sortable="true" />
                 <PropertyColumn Property="@(c => $"{c.DiscountValue}")" Title="Amount" Align="Align.End"/>

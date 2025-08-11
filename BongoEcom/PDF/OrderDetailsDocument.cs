@@ -6,6 +6,7 @@ using QuestPDF.Drawing;
 using Application.Features.Attributes.DTOs;
 using Newtonsoft.Json;
 using Application.Features.CompanyInfoes.Queries;
+using Shared.Enums;
 
 namespace BongoEcom.PDF;
 public class OrderPdfDocument : IDocument
@@ -66,7 +67,7 @@ public class OrderPdfDocument : IDocument
             {
                 customerColumn.Item().Text($"Customer: {_order.CustomerName}").FontColor(Colors.Blue.Medium);
                 customerColumn.Item().Text($"Order No: #{_order.OrderNo}");
-                customerColumn.Item().Text($"Status: {_order.Status}");
+                customerColumn.Item().Text($"Status: {(OrderStatus)_order.Status}");
                 customerColumn.Item().Text($"Delivery Address: {_order.DeliveryAddress}");
                 customerColumn.Item().Text($"Phone: {_order.CustomerPhone}");
                 customerColumn.Item().Text($"Payment Method: {_order.PaymentMethod}");

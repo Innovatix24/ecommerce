@@ -72,7 +72,7 @@ public partial class ManageOrderComponent : IDialogContentComponent
     }
     private async Task<bool> ShowConfirmationAsync()
     {
-        var dialog = await dialogueService.ShowConfirmationAsync("Are you <strong>sure</strong> you want to delete this item? <br /><br />This will also remove any linked items");
+        var dialog = await dialogueService.ShowConfirmationAsync("Are you <strong>sure</strong> you want to update status? <br /><br />This will also remove any linked items");
         var result = await dialog.Result;
         return result.Cancelled;
     }

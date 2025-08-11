@@ -31,7 +31,10 @@
             RowSize="@rowSize"
             AutoItemsPerPage="true"
             Style="overflow-y:hidden;">
-                <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" />
+                @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
+                <TemplateColumn Width="60px" Title="Sl">
+                    <p>@(deliveryCharges?.IndexOf(context) + 1)</p>
+                </TemplateColumn>
                 <PropertyColumn Property="@(c => c.AreaType)" Sortable="true" />
                 <PropertyColumn Property="@(c => $"{c.ChargeAmount} Tk")" Title="Amount" Align="Align.End"/>
                 <PropertyColumn Property="@(c => $"{c.FreeShippingThreshold} Tk")" Title="Free Shipping Over" Align="Align.End" />
