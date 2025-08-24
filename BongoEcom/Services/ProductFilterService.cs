@@ -2,12 +2,15 @@
 
 public class ProductFilterService
 {
-    public event Action<string>? SearchHandler;
+    public event Func<string, Task>? SearchHandler;
 
-    public void HandleSearch(string stringKey)
+    public async Task HandleSearch(string stringKey)
     {
-        NotifyHandleSearch(stringKey);
+        await NotifyHandleSearch(stringKey);
     }
 
-    private void NotifyHandleSearch(string stringKey) => SearchHandler?.Invoke(stringKey);
+    private async Task NotifyHandleSearch(string stringKey)
+    {
+        await SearchHandler?.Invoke(stringKey);
+    }
 }

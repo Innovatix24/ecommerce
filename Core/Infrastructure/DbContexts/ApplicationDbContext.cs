@@ -7,6 +7,7 @@ using Domain.Entities.Location;
 using Domain.Entities.MyApp;
 using Domain.Entities.Orders;
 using Domain.Entities.Products;
+using Domain.Entities.Site;
 using Infrastructure.DbContexts.Seeder;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -59,6 +60,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<DeliveryCharge> DeliveryCharges { get; set; }
     public DbSet<OrderHistory> OrderHistories { get; set; }
     public DbSet<Image> Images { get; set; }
+    public DbSet<Banner> Banners { get; set; }
     public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<ProductSpecification> ProductSpecifications { get; set; }
     public DbSet<ProductAttribute> ProductAttributes { get; set; }

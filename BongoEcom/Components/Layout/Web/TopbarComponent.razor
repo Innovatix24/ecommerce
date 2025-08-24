@@ -29,7 +29,7 @@
         </div>
     </div>
     <div class="input-group" style="width:350px;">
-        <input @bind=searchKey type="text" class="form-control" placeholder="Search">
+        <input @onchange="OnSearchChanged" @onkeyup="OnSearchKeyUp" type="text" class="form-control" placeholder="Search">
         <button @onclick=HandleSearch class="btn btn-danger"><i class="fas fa-search"></i>Search</button>
     </div>
     <div class="d-flex align-items-center gap-2">
@@ -77,9 +77,30 @@
     }
 
     string searchKey = "";
-    private void HandleSearch()
+
+    private void OnSearchChanged(ChangeEventArgs args)
     {
-        FilterService.HandleSearch(searchKey);
+        if(args.Value is null)
+        {
+            searchKey = "";
+        }
+        else
+        {
+            searchKey = args.Value.ToString();
+        }
+    }
+
+    private async void OnSearchKeyUp(KeyboardEventArgs args)
+    {
+        if (string.IsNullOrEmpty(searchKey) || searchKey.Length > 1)
+        {
+            await HandleSearch();
+        }
+    }
+
+    private async Task HandleSearch()
+    {
+        await FilterService.HandleSearch(searchKey);
     }
 
     protected override void OnInitialized()

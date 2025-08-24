@@ -10,6 +10,22 @@
 
 <div class="container mt-4">
     <div class="row">
+        @if (banners != null && banners.Any())
+        {
+            <BannerCarousel Banners="banners"
+                            AutoPlay="true"
+                            AutoPlayInterval="4000"
+                            ShowArrows="true"
+                            ShowIndicators="true"
+                            ShowPlayPause="true"
+                            Height="500px" />
+        }
+        else
+        {
+            <div class="alert alert-info">No banners available</div>
+        }
+    </div>
+    <div class="row">
         <div class="col-md-3 mb-4">
             <CategoriesComponent></CategoriesComponent>
         </div>

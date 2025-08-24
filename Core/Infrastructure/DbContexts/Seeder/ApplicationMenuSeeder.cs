@@ -27,7 +27,8 @@ public static class ApplicationMenuSeeder
 
             new NavigationMenu { Id = 13, Title = "Site Settings", IconName = "Home", Url = null, ParentId = 0 },
             new NavigationMenu { Id = 14, Title = "Company Info", IconName = "Home", Url = "/admin/company-info", ParentId = 13 },
-            new NavigationMenu { Id = 15, Title = "Social Links", IconName = "Home", Url = "/admin/social-links", ParentId = 13 }
+            new NavigationMenu { Id = 15, Title = "Social Links", IconName = "Home", Url = "/admin/social-links", ParentId = 13 },
+            new NavigationMenu { Id = 16, Title = "Banners", IconName = "Home", Url = "/admin/site/banners", ParentId = 13 }
         );
     }
 }

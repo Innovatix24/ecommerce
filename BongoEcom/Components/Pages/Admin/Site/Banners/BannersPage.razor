@@ -1,0 +1,163 @@
+﻿@page "/admin/site/banners"
+@using Application.Features.CompanyInfoes.Commands
+@using BongoEcom.Components.Common
+@using BongoEcom.Components.Inputs
+@using Application.Features.Site.Banners;
+
+@rendermode InteractiveServer
+@inject IWebHostEnvironment env
+@inject IToastService tostService
+
+@* @attribute [Authorize(Roles = "Admin,SuperAdmin")] *@
+
+<div class="card">
+    <div class="card-body">
+        <div style="display:flex; justify-content:space-between;">
+            <h3>Banners</h3>
+            <FluentButton @onclick=@(() => Navigation.NavigateTo("/admin/site/banners/create")) Color="Color.Error">Create Banner</FluentButton>
+        </div>
+
+        @if (IsLoading)
+        {
+            <Loading></Loading>
+        }
+        else if (banners?.Count == 0)
+        {
+            <p><em>No Banners found.</em></p>
+        }
+        else
+        {
+            <div>
+                <FluentDataGrid Items="banners?.AsQueryable()"
+                                TGridItem="BannerDto"
+                                Pagination="@pagination"
+                                RowSize="@rowSize"
+                                AutoItemsPerPage="true"
+                                Style="overflow-y:hidden;">
+                    <TemplateColumn Width="60px" Title="Sl">
+                        <p>@(banners?.IndexOf(context) + 1)</p>
+                    </TemplateColumn>
+                    <TemplateColumn Width="75px" Title="Image">
+                        <div>
+                            <OverlayImage ImageUrl="@context.ImageUrl" Class="rounded me-2" Style="width: 60px; height: 60px;" />
+                        </div>
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(c => c.Title)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.DisplayOrder)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.IsActive)" Sortable="true" />
+                    <TemplateColumn Title="Action">
+                        <div style="display:flex;">
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                          Title="Edit"
+                                          OnClick="@(() => Edit(context.Id))" />
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                          Title="Delete"
+                                          Color="Color.Error"
+                                          OnClick="@(() => Delete(context))" />
+                        </div>
+                    </TemplateColumn>
+                </FluentDataGrid>
+                <FluentPaginator State="@pagination" />
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+
+    DataGridRowSize rowSize = DataGridRowSize.Large;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+
+    private List<IBrowserFile> uploadedImages = new();
+    
+    bool IsLoading = false;
+
+    private void HandleImagesUploaded(List<IBrowserFile> files)
+    {
+        uploadedImages = files;
+    }
+
+    private string? Validate()
+    {
+        if (string.IsNullOrEmpty(CompanyInfo.CompanyName))
+        {
+            return "Company name is required";
+        }
+        if (string.IsNullOrEmpty(CompanyInfo.MobileNumber))
+        {
+            return "Mobile number is required";
+        }
+        if (string.IsNullOrEmpty(CompanyInfo.Email))
+        {
+            return "Email is required";
+        }
+        if (string.IsNullOrEmpty(CompanyInfo.Address))
+        {
+            return "Address is required";
+        }
+        return null;
+    }
+
+    private async void HandleSave()
+    {
+        var error = Validate();
+        if (!string.IsNullOrEmpty(error))
+        {
+            tostService.ShowError(error);
+            return;
+        }
+
+        var command = new CreateCompanyInfoCommand();
+        command.CompanyName = CompanyInfo.CompanyName;
+        command.Email = CompanyInfo.Email;
+        command.MobileNumber = CompanyInfo.MobileNumber;
+        command.Address = CompanyInfo.Address;
+        command.CompanyName = CompanyInfo.CompanyName;
+        command.LogoUrl = await GetLogoUrl();
+
+        var response = await _mediator.Send(command);
+
+        if (response.IsSuccess)
+        {
+            await UIService.ShowSuccessAsync("Saved");
+        }
+        else
+        {
+            tostService.ShowSuccess("Something went wrong");
+            DeleteImage(command.LogoUrl);
+        }
+    }
+
+    private async Task<string> GetLogoUrl()
+    {
+        if (uploadedImages.Count == 0) return "";
+
+        var item = uploadedImages.First();
+        var extension = Path.GetExtension(item.Name);
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var relativePath = Path.Combine("images", fileName);
+        var absolutePath = Path.Combine(env.WebRootPath, relativePath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
+
+        using (var fileStream = new FileStream(absolutePath, FileMode.Create))
+        {
+            await item.OpenReadStream(maxAllowedSize: 10_000_000).CopyToAsync(fileStream);
+        }
+
+        return $"/{relativePath.Replace("\\", "/")}";
+    }
+
+    private void DeleteImage(string url)
+    {
+        string relativePath = url.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+        string fullPath = Path.Combine(env.WebRootPath, relativePath);
+
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+        }
+    }
+}

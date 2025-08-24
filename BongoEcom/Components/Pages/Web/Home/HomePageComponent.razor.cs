@@ -1,5 +1,6 @@
 ﻿using Application.Features.Products.DTOs;
 using Application.Features.Products.Queries;
+using Application.Features.Site.Banners;
 namespace BongoEcom.Components.Pages.Web.Home;
 
 public partial class HomePageComponent
@@ -7,6 +8,19 @@ public partial class HomePageComponent
     bool productLoading = false;
 
     public List<ProductDto> Products = new();
+
+
+    private List<BannerDto> banners = new();
+
+    private async Task LoadBanners()
+    {
+        var query = new GetAllBannersQuery();
+        var result = await _mediator.Send(query);
+        if (result.IsSuccess)
+        {
+            banners = result.Data ?? new();
+        }
+    }
 
     protected override Task OnInitializedAsync()
     {
@@ -19,6 +33,8 @@ public partial class HomePageComponent
     {
         if (firstRender)
         {
+            await LoadBanners();
+            StateHasChanged();
             await LoadProducts(0);
         }
         await base.OnAfterRenderAsync(firstRender);
@@ -32,7 +48,7 @@ public partial class HomePageComponent
         StateHasChanged();
     }
 
-    private async void HandleProductSearch(string searchKey)
+    private async Task HandleProductSearch(string searchKey)
     {
         await LoadProducts(0, searchKey, 1);
         //productLoading = true;
@@ -59,7 +75,7 @@ public partial class HomePageComponent
         var query = new GetPaginatedProductsQuery()
         {
             PageNumber = pageNumber,
-            PageSize = 5,
+            PageSize = 15,
             CategoryId = categoryId,
             SearchTerm = filter
         };

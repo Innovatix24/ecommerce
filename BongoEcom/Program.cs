@@ -30,10 +30,10 @@ app.MapRazorComponents<App>()
 
 app.MapAdditionalIdentityEndpoints();
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    await IdentitySeeder.SeedSuperAdminAsync(services);
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    await IdentitySeeder.SeedSuperAdminAsync(services);
+//}
 
 app.Run();

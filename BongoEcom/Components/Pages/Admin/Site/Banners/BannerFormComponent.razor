@@ -1,0 +1,61 @@
+﻿@page "/admin/site/banners/create"
+@page "/admin/site/banners/edit/{BannerId:int}"
+@using BongoEcom.Components.Inputs
+
+@rendermode InteractiveServer
+@inject IWebHostEnvironment env
+@inject IToastService tostService
+
+<div style="border-radius: 10px; padding:12px; background-color: white;">
+    <div class="container">
+        <h3>Create Banner</h3>
+        <div class="row mb-3">
+            <div class="col-md-6 p-3">
+                <label for="productName" class="form-label">Title</label>
+                <InputText @bind-Value="banner.Title" id="productName" class="form-control" placeholder="Enter Banner Title" />
+            </div>
+            <div class="col-md-6 p-3">
+                <label for="productNameBangla" class="form-label">Description</label>
+                <InputText @bind-Value="banner.Description" id="productNameBangla" class="form-control" placeholder="" />
+            </div>
+            <div class="col-md-6 p-3">
+                <label for="price" class="form-label">Target URL</label>
+                <InputText @bind-Value="banner.TargetUrl" id="price" class="form-control" placeholder="https://innovatixinfosys.com" />
+            </div>
+            <div class="col-md-3 p-3">
+                <label for="price" class="form-label">Display Order</label>
+                <InputNumber @bind-Value="banner.DisplayOrder" id="price" class="form-control" placeholder="0" />
+            </div>
+            <div class="col-md-3 p-3">
+                <div style="height:34px;"></div>
+                <FluentCheckbox @bind-Value="@banner.IsActive" Label="Is Active" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <label class="form-label">Product Images</label>
+                <ImageInputComponent OnFilesChanged="HandleImagesUploaded" />
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12 text-end">
+                <FluentButton OnClick="HandleSubmit" Color="Color.Success" Appearance="Appearance.Accent">Save</FluentButton>
+            </div>
+        </div>
+    </div> 
+</div>
+
+@code {
+    [Parameter] public int BannerId { get; set; }
+    private MyTextEditor editor;
+    private MyTextEditor shortEditor;
+
+    private List<IBrowserFile> uploadedImages = new();
+
+    private void HandleImagesUploaded(List<IBrowserFile> files)
+    {
+        uploadedImages = files;
+    }
+}

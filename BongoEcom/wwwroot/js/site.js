@@ -20,3 +20,51 @@ window.initSidebarToggle = () => {
         });
     }
 };
+
+window.bannerCarousel = {
+    init: function (element, dotNetHelper) {
+        let startX, movedX;
+        const threshold = 50; // Minimum swipe distance
+
+        element.addEventListener('touchstart', handleTouchStart, { passive: true });
+        element.addEventListener('touchmove', handleTouchMove, { passive: true });
+        element.addEventListener('touchend', handleTouchEnd);
+
+        function handleTouchStart(e) {
+            startX = e.touches[0].clientX;
+            movedX = startX;
+        }
+
+        function handleTouchMove(e) {
+            movedX = e.touches[0].clientX;
+        }
+
+        function handleTouchEnd() {
+            const diffX = movedX - startX;
+
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    dotNetHelper.invokeMethodAsync('HandleSwipe', 'right');
+                } else {
+                    dotNetHelper.invokeMethodAsync('HandleSwipe', 'left');
+                }
+            }
+        }
+
+        // Store reference for cleanup
+        element._swipeHandlers = {
+            touchstart: handleTouchStart,
+            touchmove: handleTouchMove,
+            touchend: handleTouchEnd
+        };
+    },
+
+    dispose: function (element) {
+        if (element._swipeHandlers) {
+            element.removeEventListener('touchstart', element._swipeHandlers.touchstart);
+            element.removeEventListener('touchmove', element._swipeHandlers.touchmove);
+            element.removeEventListener('touchend', element._swipeHandlers.touchend);
+            delete element._swipeHandlers;
+        }
+    }
+};

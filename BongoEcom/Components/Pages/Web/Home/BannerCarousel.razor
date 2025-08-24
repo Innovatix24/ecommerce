@@ -1,0 +1,66 @@
+﻿@using System.Timers
+@inject IJSRuntime JSRuntime
+
+<div class="banner-carousel-container">
+    <div class="banner-carousel" @ref="carouselRef">
+        @foreach (var banner in Banners)
+        {
+            <div class="banner-slide @(banner == CurrentBanner ? "active" : "")"
+                 style="background-image: url('@banner.ImageUrl')">
+                <div class="banner-overlay">
+                    <div class="banner-content">
+                        <h2 class="banner-title">@banner.Title</h2>
+                        <p class="banner-description">@banner.Description</p>
+                        @if (!string.IsNullOrEmpty(banner.TargetUrl))
+                        {
+                            <a href="@banner.TargetUrl" class="banner-button btn btn-primary">
+                                Shop Now
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Navigation Arrows -->
+    @if (ShowArrows && Banners.Count > 1)
+    {
+        <button class="carousel-control prev" @onclick="PrevBanner">
+            <span class="carousel-arrow">&#10094;</span>
+        </button>
+        <button class="carousel-control next" @onclick="NextBanner">
+            <span class="carousel-arrow">&#10095;</span>
+        </button>
+    }
+
+    <!-- Indicators -->
+    @if (ShowIndicators && Banners.Count > 1)
+    {
+        <div class="carousel-indicators">
+            @for (int i = 0; i < Banners.Count; i++)
+            {
+                <button class="indicator @(i == CurrentIndex ? "active" : "")"
+                        @onclick="() => GoToBanner(i)"
+                        aria-label="Go to slide @(i + 1)"></button>
+            }
+        </div>
+    }
+
+    <!-- Auto-play controls -->
+    @if (ShowPlayPause && Banners.Count > 1)
+    {
+        <div class="carousel-play-controls">
+            <button class="play-pause-btn" @onclick="ToggleAutoPlay">
+                @if (IsAutoPlaying)
+                {
+                    <span>⏸️</span>
+                }
+                else
+                {
+                    <span>▶️</span>
+                }
+            </button>
+        </div>
+    }
+</div>
