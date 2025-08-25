@@ -3,6 +3,7 @@
 @using Application.Features.Products.DTOs
 @using Application.Features.Products.Queries
 @using BongoEcom.Components.Common
+
 @rendermode InteractiveServer
 
 @inject CartService cartService
@@ -151,7 +152,6 @@
 
     private async void AddToCart()
     {
-
         var attributes = new List<ItemAttribute>();
 
         foreach(var att in SelectedAttributes)

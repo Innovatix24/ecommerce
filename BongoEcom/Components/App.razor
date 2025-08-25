@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="@Assets["bootstrap/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["site/site.css"]" />
+    <link rel="stylesheet" href="@Assets["lib/css/myToaster.css"]" />
     <link rel="stylesheet" href="@Assets["BongoEcom.styles.css"]" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
@@ -38,7 +39,7 @@
     </div>
 
     <script src="/jsHelper.js"></script>
-    @* <script src="/js/bootstrap.modal.js"></script> *@
+    <script src="/js/bootstrap.modal.js"></script>
     
     <script>
         window.loader = {
@@ -73,7 +74,7 @@
             setTimeout(() => URL.revokeObjectURL(url), 10000);
         }
     </script>
-    <script src="/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+    @* <script src="/lib/bootstrap/dist/js/bootstrap.bundle.js"></script> *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="js/imageUploader.js"></script>
@@ -84,5 +85,17 @@
     <script src="_content/Blazored.TextEditor/Blazored-BlazorQuill.js"></script>
 
     <script src="js/site.js"></script>
+
+
+    <script>
+        const toggler = document.querySelector('.navbar-toggler');
+        const menu = document.getElementById('navMenu');
+
+        toggler.addEventListener('click', () => {
+          menu.classList.toggle('show');
+          const expanded = toggler.getAttribute('aria-expanded') === 'true';
+          toggler.setAttribute('aria-expanded', (!expanded).toString());
+        });
+    </script>
 </body>
 </html>

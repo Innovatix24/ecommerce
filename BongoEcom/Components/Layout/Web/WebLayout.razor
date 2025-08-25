@@ -1,6 +1,6 @@
 ﻿@using Application.Features.CompanyInfoes.Queries
+@using BongoEcom.Services.Contracts
 @inject CompanyInfoService companyService
-
 @inherits LayoutComponentBase
 
 <div class="page">
@@ -29,5 +29,16 @@
         CompanyInfo = companyService.CompanyInfo ?? new();
 
         Auth.OnChange += StateHasChanged;
+    }
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // var userId = UserService.GetUserId();
+            // CartService.SetUserId(userId);
+        }
+       
+        return base.OnAfterRenderAsync(firstRender);
     }
 }

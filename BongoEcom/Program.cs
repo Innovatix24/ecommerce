@@ -1,12 +1,32 @@
+using Blazored.Toast;
 using BongoEcom;
 using BongoEcom.Components;
+using BongoEcom.Services.Contracts;
 using Infrastructure;
-using Infrastructure.DbContexts.Seeder;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddBongoEcom()
     .AddInfrastructure();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+    options.InstanceName = "BongoEcom_";
+});
+
+//builder.Services.AddSession(options =>
+//{
+//    options.Cookie.Name = "BongoEcom.Session";
+//    options.IdleTimeout = TimeSpan.FromHours(2);
+//    options.Cookie.HttpOnly = true;
+//    options.Cookie.IsEssential = true;
+//    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+//});
+
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 

@@ -1,12 +1,17 @@
 ﻿@using Application.Features.CompanyInfoes.Queries
 @using BongoEcom.Components.Pages.Web.Cart
-@using BongoEcom.Services
+@using service = BongoEcom.Services
+@using BongoEcom.Services.Contracts
 @using Microsoft.AspNetCore.Components.Authorization
 
 @rendermode InteractiveServer
 
+@inject ICartService cartService
+@inject IUserService UserService
+
+
 @inject ProductFilterService FilterService
-@inject CartService CartService
+@inject service.CartService CartService
 @* @inject IDialogService dialogService; *@
 @implements IDisposable
 
@@ -69,7 +74,12 @@
             // await companyService.Load();
             // CompanyInfo = companyService.CompanyInfo ?? new();
 
+            var userId = await UserService.GetUserIdAsync();
+            cartService.SetUserId(userId);
+
             var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+
+            await CartService.LoadShoppingCartAsync();
 
             StateHasChanged();
         }

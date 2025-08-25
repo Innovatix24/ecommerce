@@ -1,7 +1,18 @@
 ﻿using Application.Features.Attributes.DTOs;
 using Application.Features.Products.DTOs;
+using BongoEcom.Services.Contracts;
+using Domain.Entities.Carts;
 
 namespace BongoEcom.Services;
+
+public class ShoppingCart
+{
+    public List<CartItemModel> Items { get; set; } = new List<CartItemModel>();
+    public int TotalItems => Items.Sum(item => item.Qty);
+    public decimal TotalPrice => Items.Sum(item => item.Rate * item.Qty);
+    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+}
+
 
 public class CartItemModel
 {
@@ -31,7 +42,7 @@ public class CartItemModel
     }
 }
 
-public class CartService(SweetAlertService SAlert, UIHelperService UIService)
+public class CartService(SweetAlertService SAlert, UIHelperService UIService, ICartService cartService)
 {
     private List<CartItemModel> items = new();
     private SweetAlertService alertService = SAlert;
@@ -41,6 +52,13 @@ public class CartService(SweetAlertService SAlert, UIHelperService UIService)
     public event Action OnChange;
 
     private void NotifyStateChanged() => OnChange?.Invoke();
+
+    public async Task LoadShoppingCartAsync()
+    {
+        var cart = await cartService.GetCartAsync();
+        items = cart.Items;
+        NotifyStateChanged();
+    }
 
     public async Task<bool> AddProduct(ProductDto product, List<ItemAttribute>? attributes = null, int qty = 1)
     {
@@ -69,6 +87,7 @@ public class CartService(SweetAlertService SAlert, UIHelperService UIService)
                 Attributes = attributes ?? new(),
             };
             items.Add(item);
+            await cartService.AddItemAsync(item);
         }
         UIService.SuccessToastMessage("Product is added to cart");
         NotifyStateChanged();
@@ -90,15 +109,17 @@ public class CartService(SweetAlertService SAlert, UIHelperService UIService)
         NotifyStateChanged();
     }
 
-    public void RemoveItem(int productId)
+    public async void RemoveItem(int productId)
     {
         items.RemoveAll(i => i.Id == productId);
+        await cartService.RemoveItemAsync(productId);
         NotifyStateChanged();
     }
 
-    public void ClearCart()
+    public async void ClearCart()
     {
         items.Clear();
+        await cartService.ClearCartAsync();
         NotifyStateChanged();
     }
 

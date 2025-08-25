@@ -68,3 +68,13 @@ window.bannerCarousel = {
         }
     }
 };
+
+
+window.getBrowserId = () => {
+    let browserId = localStorage.getItem('browserId');
+    if (!browserId) {
+        browserId = 'browser_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('browserId', browserId);
+    }
+    return browserId;
+}
