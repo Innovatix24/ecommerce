@@ -1,0 +1,145 @@
+﻿
+@page "/admin/settings"
+@using Application.Features.Settings
+@rendermode InteractiveServer
+
+@inject IDialogService DialogService
+
+<div class="card">
+    <div class="card-body">
+        <h3>Settings Management</h3>
+        @if (isLoading)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            <div style="height:80vh; overflow:auto;">
+                <FluentDataGrid Items="settings?.AsQueryable()"
+                                TGridItem="SettingDto"
+                                AutoItemsPerPage="true"
+                                RowSize="DataGridRowSize.Medium"
+                                Style="overflow-y:hidden;">
+                    
+                    @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
+                    <TemplateColumn Width="60px" Title="Sl">
+                        <p>@(settings?.IndexOf(context) + 1)</p>
+                    </TemplateColumn>
+                    <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
+                    <PropertyColumn Property="@(c => c.Value)" Sortable="true" />
+                    <TemplateColumn Title="Action">
+                        <div style="display:flex;">
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                          Title="Edit"
+                                          OnClick="@(() => Edit(context))" />
+                        </div>
+                    </TemplateColumn>
+                </FluentDataGrid>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<SettingDto> settings = new();
+    private SettingDto editModel = new();
+    private bool isLoading = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Load();
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task Load()
+    {
+        var query = new GetAllSettingsQuery();
+        isLoading = true;
+        var response = await _mediator.Send(query);
+        isLoading = false;
+        if (response.IsSuccess)
+        {
+            settings = response.Data ?? new();
+        }
+    }
+
+    private async void Edit(SettingDto s)
+    {
+        editModel = new SettingDto
+        {
+            Key = s.Key,
+            Name = s.Name,
+            Value = s.Value,
+            TValue = s.TValue
+        };
+        await OpenDialogAsync();
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrEmpty(editModel.Key))
+            return;
+
+        var existing = settings.FirstOrDefault(x => x.Key == editModel.Key);
+
+
+        await Load();
+        editModel = new SettingDto();
+    }
+
+    private async Task Delete(string key)
+    {
+        await Load();
+    }
+
+    private void Cancel()
+    {
+        editModel = new SettingDto();
+    }
+
+    private bool _trapFocus = true;
+    private bool _modal = true;
+
+    private async Task OpenDialogAsync()
+    {
+        await DialogService.ShowDialogAsync<SettingsFormDialog>(editModel, new DialogParameters()
+        {
+            Title = $"{editModel.Name}",
+            OnDialogResult = DialogService.CreateDialogCallback(this, HandleDialog),
+            PrimaryAction = "Save",
+            PrimaryActionEnabled = true,
+            SecondaryAction = null,
+            Width = "300px",
+            Height = "250px",
+            TrapFocus = _trapFocus,
+            Modal = _modal,
+        });
+    }
+
+    private async Task HandleDialog(DialogResult result)
+    {
+        if (result.Cancelled)
+        {
+            return;
+        }
+        if (result.Data is not null)
+        {
+            SettingDto? setting = result.Data as SettingDto;
+            if(setting != null)
+            {
+                var command = new UpdateSettingsValueCommand(setting.Key, setting.Value);
+                var response = await _mediator.Send(command);
+                if (response.IsSuccess)
+                {
+                    await Load();
+                    StateHasChanged();
+                }
+            }
+            return;
+        }
+    }
+}

@@ -61,6 +61,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<OrderHistory> OrderHistories { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Banner> Banners { get; set; }
+    public DbSet<Setting> Settings { get; set; }
     public DbSet<ProductImage> ProductImages { get; set; }
     public DbSet<ProductSpecification> ProductSpecifications { get; set; }
     public DbSet<ProductAttribute> ProductAttributes { get; set; }

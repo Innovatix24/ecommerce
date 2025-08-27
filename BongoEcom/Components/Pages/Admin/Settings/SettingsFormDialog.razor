@@ -1,0 +1,18 @@
+﻿@using Application.Features.Settings
+
+@implements IDialogContentComponent<SettingDto>
+
+<FluentTextField @bind-Value="@Content.Value" Style="width:100%;">Value</FluentTextField>
+
+@code {
+    [Parameter]
+    public SettingDto Content { get; set; } = default!;
+
+    [CascadingParameter]
+    public FluentDialog? Dialog { get; set; }
+
+    private void ToggleDialogPrimaryActionButton(bool enable)
+    {
+        Dialog!.TogglePrimaryActionButton(enable);
+    }
+}

@@ -1,6 +1,9 @@
 ﻿using Application.Features.Products.DTOs;
 using Application.Features.Products.Queries;
+using Application.Features.Settings;
 using Application.Features.Site.Banners;
+using Shared.Enums;
+
 namespace BongoEcom.Components.Pages.Web.Home;
 
 public partial class HomePageComponent
@@ -22,11 +25,25 @@ public partial class HomePageComponent
         }
     }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         State.OnChange += OnCategoryChanged;
         FilterService.SearchHandler += HandleProductSearch;
-        return base.OnInitializedAsync();
+
+        await LoadSettingsAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    int autoPlayInterval = 5000;
+    private async Task LoadSettingsAsync()
+    {
+        var response = await _mediator.Send(new GetSettingByKeyQuery(SettingsKey.BannerSlideInterval));
+        if (response.IsSuccess)
+        {
+            var setting = response.Data ?? new();
+            autoPlayInterval = int.Parse(setting.Value);
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

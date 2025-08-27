@@ -22,15 +22,16 @@ public class IconProvider
     {
         Icons.Clear();
 
-        Icons["Home"] = new Icons.Regular.Size20.Cart();
+        Icons["Home"] = new Icons.Regular.Size20.Home();
+        Icons["Order"] = new Icons.Regular.Size20.ReOrderVertical();
         Icons["Cart"] = new Icons.Regular.Size20.Cart();
         Icons["Settings"] = new Icons.Regular.Size20.Settings();
-        Icons["Settigs"] = new Icons.Regular.Size20.Settings();
         Icons["Equation"] = new Icons.Regular.Size20.MathFormatProfessional();
         Icons["BuildingShop"] = new Icons.Regular.Size20.BuildingShop();
         Icons["Airplane"] = new Icons.Regular.Size20.Airplane();
         Icons["BarcodeScanner"] = new Icons.Regular.Size20.BarcodeScanner();
         Icons["Print"] = new Icons.Regular.Size20.Print();
+        Icons["Report"] = new Icons.Regular.Size20.Receipt();
     }
 
     public Icon GetIcon(string name)
