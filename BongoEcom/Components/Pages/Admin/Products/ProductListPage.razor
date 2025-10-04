@@ -32,11 +32,10 @@
         {
             <div>
                 <FluentDataGrid Items="products?.AsQueryable()"
-                                TGridItem="ProductDto"
-                                Pagination="@pagination"
-                                RowSize="@rowSize"
-                                AutoItemsPerPage="true"
-                                Style="overflow-y:hidden;">
+                TGridItem="ProductDto"
+                RowSize="@rowSize"
+                AutoItemsPerPage="true"
+                Style="overflow-y:hidden;">
                     @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
                     <TemplateColumn Width="60px" Title="Sl">
                         <p>@(products?.IndexOf(context) + 1)</p>
@@ -53,16 +52,16 @@
                     <TemplateColumn Title="Action">
                         <div style="display:flex;">
                             <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
-                                          Title="Edit"
-                                          OnClick="@(() => Edit(context.Id))" />
+                            Title="Edit"
+                            OnClick="@(() => Edit(context.Id))" />
                             <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                          Title="Delete"
-                                          Color="Color.Error"
-                                          OnClick="@(() => Delete(context))" />
+                            Title="Delete"
+                            Color="Color.Error"
+                            OnClick="@(() => Delete(context))" />
                             <FluentButton IconEnd="@(new Icons.Regular.Size16.Eye())"
-                                          Title="SKUs"
-                                          Color="Color.Error"
-                                          OnClick="@(() => SKUs(context.Id))" />
+                            Title="SKUs"
+                            Color="Color.Error"
+                            OnClick="@(() => SKUs(context.Id))" />
                         </div>
                     </TemplateColumn>
                 </FluentDataGrid>
@@ -121,7 +120,6 @@
         StateHasChanged();
         await LoadProducts();
         StateHasChanged();
-
     }
 
     private async Task LoadProducts()

@@ -3,6 +3,8 @@ using Application.Features.Inventories;
 using Application.Features.Products.DTOs;
 using Application.Features.Products.Queries;
 using BongoEcom.Components.Common;
+using BongoEcom.Components.Pages.Admin.Products;
+using Microsoft.FluentUI.AspNetCore.Components;
 
 namespace BongoEcom.Components.Pages.Admin.Inventories;
 
@@ -16,12 +18,22 @@ public partial class ProductSKUsPageComponent
     {
         if (firstRender)
         {
-            //await LoadProducts();
+            await LoadProduct();
             await LoadDashboardData((short)ProductId);
             StateHasChanged();
         }
 
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+    ProductDto product = new ProductDto();
+    private async Task LoadProduct()
+    {
+        var response = await _mediator.Send(new GetProductDetailsByIdQuery((short)ProductId));
+        if (response.IsSuccess)
+        {
+            product = response.Data ?? new();
+        }
     }
 
     DashboardDetail Detail = new();
@@ -53,9 +65,29 @@ public partial class ProductSKUsPageComponent
         }
     }
 
-    private void Edit(SKUDto sku)
+    private async Task Edit(SKUDto sku)
     {
+        DialogParameters parameters = new()
+        {
+            Title = $"Edit SKU",
+            PrimaryAction = "Yes",
+            PrimaryActionEnabled = false,
+            SecondaryAction = "No",
+            Width = "450px",
+            TrapFocus = false,
+            Modal = false,
+            PreventScroll = true
+        };
 
+
+        IDialogReference dialog = await dialogService.ShowDialogAsync<SKUEditModalComponent>(sku, parameters);
+        DialogResult? result = await dialog.Result;
+
+        if (result?.Data is SKUDto content)
+        {
+            //await LoadDashboardData((short)ProductId);
+        }
+        await LoadDashboardData((short)ProductId);
     }
 
     private void Remove(SKUDto sku)

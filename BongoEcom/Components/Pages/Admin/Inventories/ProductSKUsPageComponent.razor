@@ -5,12 +5,16 @@
 @using BongoEcom.Components.Common
 
 @rendermode InteractiveServer
+@inject IDialogService dialogService;
 
 @attribute [Authorize(Roles = "Admin,SuperAdmin")]
 
 <PageTitle>Product SKUs</PageTitle>
 
 <div class="card p-4">
+    <div>
+        <h3>Product : @(product.Name)</h3>
+    </div>
     <FluentDataGrid Items="SKUs.AsQueryable()"
                     TGridItem="SKUDto"
                     RowSize="@rowSize"
@@ -41,7 +45,7 @@
 
 @code {
     DataGridRowSize rowSize = DataGridRowSize.Medium;
-    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    PaginationState pagination = new PaginationState { ItemsPerPage = 20 };
 
     static string cmbProductId = Identifier.NewId();
 

@@ -6,7 +6,7 @@ namespace Domain.Entities.Inventories;
 
 public class SKU : Entity<int>
 {
-    public int ProductId { get; set; }
+    public short ProductId { get; set; }
     public string SKUCode { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public decimal? DiscountPrice { get; set; }

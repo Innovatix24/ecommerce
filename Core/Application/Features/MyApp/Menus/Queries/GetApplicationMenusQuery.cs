@@ -19,6 +19,7 @@ public class GetApplicationMenusHandler : IRequestHandler<GetApplicationMenusQue
     public async Task<Result<List<NavigationMenuDto>>> Handle(GetApplicationMenusQuery request, CancellationToken cancellationToken)
     {
         var menus = await _context.NavigationMenus
+            .Where(x=> x.IsActive)
             .Select(m => new NavigationMenuDto
             {
                 Id = m.Id,

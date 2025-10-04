@@ -108,7 +108,15 @@ public class OrderPdfDocument : IDocument
                 // Items
                 foreach (var item in _order.Items)
                 {
-                    table.Cell().Padding(5).Image(MapWwwrootPath(item.ImageUrl), ImageScaling.FitArea);
+                    var fullPath = MapWwwrootPath(item.ImageUrl);
+                    if (File.Exists(fullPath))
+                    {
+                        table.Cell().Padding(5).Image(fullPath, ImageScaling.FitArea);
+                    }
+                    else
+                    {
+                        table.Cell().Text("");
+                    }
                     table.Cell().Text(item.ProductName);
                     table.Cell().Text(txt =>
                     {
@@ -169,6 +177,7 @@ public class OrderPdfDocument : IDocument
     public string MapWwwrootPath(string relativePath)
     {
         var cleanPath = relativePath.TrimStart('~', '/');
-        return Path.Combine(_env.WebRootPath, cleanPath);
+        var path =  Path.Combine(_env.WebRootPath, cleanPath);
+        return path;
     }
 }

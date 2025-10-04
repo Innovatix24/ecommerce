@@ -1,0 +1,137 @@
+﻿@using Application.Features.Attributes.DTOs
+@using Application.Features.Inventories
+@using Application.Features.Products.Commands
+@using Application.Features.Products.DTOs
+@using BongoEcom.Components.Common
+@using BongoEcom.Services
+@rendermode InteractiveServer
+@inject IDialogService dialogueService
+@* @inject JSHelper js *@
+
+<FluentDialogFooter>
+    <FluentButton BackgroundColor="Green" Appearance="Appearance.Accent" OnClick="@AddItemAsync">Save</FluentButton>
+    <FluentButton BackgroundColor="OrangeRed" Appearance="Appearance.Accent" OnClick="@CancelAsync">Cancel</FluentButton>
+</FluentDialogFooter>
+
+<FluentDialogBody>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <FluentTextField Label="Price"
+                             Value="@(Content.Price.ToString())"
+                             AutoComplete="off"
+                             @oninput=@HandlePriceInput
+                             @onkeyup=@HandlePriceKeyUp />
+        </div>
+        <div class="col-md-6">
+            <FluentTextField Label="Discount Price"
+                             Value="@(Content.DiscountPrice.ToString())"
+                             AutoComplete="off"
+                             @oninput=@HandleDiscountPriceInput
+                             @onkeyup=@HandleDiscountPriceKeyUp />
+        </div>
+        <div class="col-md-6">
+            <FluentTextField Label="Stock"
+                             Value="@(Content.StockQuantity.ToString())"
+                             AutoComplete="off"
+                             @oninput=@HandleStockInput
+                             @onkeyup=@HandleStockKeyUp />
+        </div>
+        <div class="col-md-6">
+            <div style="height:25px;"></div>
+            <FluentCheckbox @bind-Value="@Content.IsActive" Label="Is Active" />
+        </div>
+    </div>
+</FluentDialogBody>
+
+@code {
+    List<ProductAttributeValueDto> Values = new();
+    List<AttributeDto> Attributes = new();
+
+    AttributeDto? Attribute = new();
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private void SelectAttribute(AttributeDto item)
+    {
+        Attribute = item;
+    }
+
+    private async void AddItemAsync()
+    {
+        var command = new UpdateSKUCommand
+        {
+            Id = Content.Id,
+            Price = Content.Price,
+            DiscountPrice = Content.DiscountPrice,
+            StockQuantity = Content.StockQuantity,
+            IsActive = Content.IsActive,
+        };
+        await _mediator.Send(command);
+
+        await Dialog.CloseAsync(Content);
+    }
+
+    private void CancelAsync()
+    {
+
+    }
+
+    private void RemoveTag(ProductAttributeValueDto item)
+    {
+        Values.Remove(item);
+    }
+
+    private void HandlePriceInput(ChangeEventArgs e)
+    {
+        if (e.Value is null) return;
+        var str = e.Value.ToString();
+        decimal.TryParse(str, out decimal value);
+        Content.Price = value;
+    }
+
+    private void HandleDiscountPriceInput(ChangeEventArgs e)
+    {
+        if (e.Value is null) return;
+        var str = e.Value.ToString();
+        decimal.TryParse(str, out decimal value);
+        Content.DiscountPrice = value;
+    }
+
+    private void HandleStockInput(ChangeEventArgs e)
+    {
+        if (e.Value is null) return;
+        var str = e.Value.ToString();
+        int.TryParse(str, out int value);
+        Content.StockQuantity = value;
+    }
+
+    private void HandlePriceKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+
+        }
+    }
+
+    private void HandleDiscountPriceKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+
+        }
+    }
+    private void HandleStockKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+
+        }
+    }
+}

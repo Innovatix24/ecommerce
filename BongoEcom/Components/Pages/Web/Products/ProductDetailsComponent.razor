@@ -36,7 +36,7 @@
 
             <!-- Details -->
             <div class="col-md-7">
-                <h4 class="text-success">@Product.SalePrice Tk</h4>
+                <h4 class="text-success">@(sKU.Price * qty) Tk</h4>
                 <p class="text-muted">Status: <FluentBadge>@Product.StockStatus</FluentBadge></p>
                 <p>@((MarkupString)Product.ShortDescription)</p>
 
@@ -120,6 +120,7 @@
     List<string> imagesUrls = new();
 
     List<SKUDto> sKUs = new();
+    SKUDto sKU = new();
     List<ProductAttributeValueDto> selectedValues = new();
 
     protected override async Task OnInitializedAsync()
@@ -141,6 +142,7 @@
         }
 
         SetSelectedAttributes();
+        sKU = GetSku();
 
         isLoading = false;
     }
@@ -169,7 +171,9 @@
 
         SelectedAttributes[attributeName] = value;
 
-        SKUDto sku = GetSku();
+        SetSelectedAttributes();
+
+        sKU = GetSku();
     }
 
     private SKUDto GetSku()
