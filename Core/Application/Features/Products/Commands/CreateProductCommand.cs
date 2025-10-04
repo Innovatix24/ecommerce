@@ -1,5 +1,6 @@
 ﻿
 using Application.Features.Products.DTOs;
+using Application.Services;
 using Domain.Entities.Products;
 
 namespace Application.Features.Products.Commands;
@@ -31,6 +32,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Result
 
     public async Task<Result<int>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
+
         try
         {
             await _context.Database.BeginTransactionAsync();
@@ -65,6 +67,8 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Result
                 _context.ProductImages.Add(image);
             }
 
+            var attributes = new List<ProductAttribute>();
+
             foreach (var item in request.Attributes)
             {
                 var attribute = new ProductAttribute
@@ -78,6 +82,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Result
                 };
 
                 _context.ProductAttributes.Add(attribute);
+                attributes.Add(attribute);
             }
 
             foreach (var item in request.Specifications)
@@ -92,6 +97,12 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Result
                 _context.ProductSpecifications.Add(spec);
             }
 
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var skus = new SKUGenerationService().GenerateSKUs(product, attributes);
+
+            await _context.AddRangeAsync(skus);
             await _context.SaveChangesAsync(cancellationToken);
 
             await _context.Database.CommitTransactionAsync();

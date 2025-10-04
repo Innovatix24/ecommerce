@@ -1,0 +1,49 @@
+﻿@page "/admin/skus"
+@page "/admin/skus/{ProductId:int}"
+@using Application.Features.Inventories;
+@using Application.Features.Products.DTOs;
+@using BongoEcom.Components.Common
+
+@rendermode InteractiveServer
+
+@attribute [Authorize(Roles = "Admin,SuperAdmin")]
+
+<PageTitle>Product SKUs</PageTitle>
+
+<div class="card p-4">
+    <FluentDataGrid Items="SKUs.AsQueryable()"
+                    TGridItem="SKUDto"
+                    RowSize="@rowSize"
+                    AutoItemsPerPage="true"
+                    ShowHover="true"
+                    Style="overflow-y:hidden;">
+        <PropertyColumn Property="@(c => "#" + c.SKUCode.ToString())" Sortable="true" Title="SKU" />
+        <PropertyColumn Property="@(c => c.Price)" Sortable="true" Title="Price" />
+        <PropertyColumn Property="@(c => c.DiscountPrice)" Title="Discount Price" />
+        <TemplateColumn Title="Attribute">
+            <p style="font-weight:bold; font-size:14px;">@context.AttributeStr</p>
+        </TemplateColumn>
+        <PropertyColumn Property="@(c => c.StockQuantity)" Title="Stock" Align="Align.End" Width="100px"/>
+        
+        <TemplateColumn Title="Action">
+            <div style="display:flex;">
+                <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                              Title="Details"
+                              Color="Color.Error"
+                              OnClick="@(() => Edit(context))" />
+                <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                              Title="PDF"
+                              OnClick="@(() => Remove(context))" />
+            </div>
+        </TemplateColumn>
+    </FluentDataGrid>
+</div>
+
+@code {
+    DataGridRowSize rowSize = DataGridRowSize.Medium;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+
+    static string cmbProductId = Identifier.NewId();
+
+    [Parameter] public int ProductId { get; set; }
+}

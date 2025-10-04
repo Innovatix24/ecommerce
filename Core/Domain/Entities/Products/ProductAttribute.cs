@@ -6,7 +6,7 @@ public class ProductAttribute : Entity<short>
     public short ProductId { get; set; }
     public short AttributeId { get; set; }
     public Attribute Attribute { get; set; }
-    public ICollection<ProductAttributeValue> Values { get; set; } = new List<ProductAttributeValue>();
+    public List<ProductAttributeValue> Values { get; set; } = new();
 }
 
 public class ProductAttributeValue : Entity<int>

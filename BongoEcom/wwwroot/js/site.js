@@ -5,8 +5,11 @@ window.bootstrapInterop = {
         myModal.show();
     },
     hideModal: (selector) => {
-        const myModal = bootstrap.Modal.getInstance(document.querySelector(selector));
-        if (myModal) myModal.hide();
+        //const myModal = bootstrap.Modal.getInstance(document.querySelector(selector));
+        var element = document.querySelector(selector);
+        element.classList.remove("show");
+        //console.log(element);
+        //if (myModal) myModal.hide();
     }
 };
 

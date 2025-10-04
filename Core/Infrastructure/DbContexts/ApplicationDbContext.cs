@@ -3,6 +3,7 @@ using Domain.Entities;
 using Domain.Entities.Auth;
 using Domain.Entities.Carts;
 using Domain.Entities.Categories;
+using Domain.Entities.Inventories;
 using Domain.Entities.Location;
 using Domain.Entities.MyApp;
 using Domain.Entities.Orders;
@@ -70,4 +71,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Division> Divisions => Set<Division>();
     public DbSet<District> Districts => Set<District>();
     public DbSet<Upazila> Upazilas => Set<Upazila>();
+
+    public DbSet<SKU> SKUs => Set<SKU>();
+    public DbSet<SKUAttributeValue> SKUAttributeValues => Set<SKUAttributeValue>();
+
+
 }

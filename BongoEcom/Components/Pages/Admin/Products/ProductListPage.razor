@@ -59,6 +59,10 @@
                                           Title="Delete"
                                           Color="Color.Error"
                                           OnClick="@(() => Delete(context))" />
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Eye())"
+                                          Title="SKUs"
+                                          Color="Color.Error"
+                                          OnClick="@(() => SKUs(context.Id))" />
                         </div>
                     </TemplateColumn>
                 </FluentDataGrid>
@@ -131,6 +135,7 @@
     }
 
     private void Edit(int id) => Navigation.NavigateTo($"admin/products/edit/{id}");
+    private void SKUs(int id) => Navigation.NavigateTo($"admin/skus/{id}");
 
     private async Task Delete(ProductDto product)
     {
