@@ -20,7 +20,8 @@ public class SKUGenerationService
         var skus = new List<SKU>();
         foreach (var combo in combinations)
         {
-            string codeSuffix = string.Join("-", combo.Select(v => v.Value.ToUpper().Replace(" ", "")));
+            var ordered = combo.OrderBy(x => x.Id).ToList();
+            string codeSuffix = string.Join("-", ordered.Select(v => v.Value.ToUpper().Replace(" ", "")));
             string skuCode = $"{product.Id}-{codeSuffix}";
 
             var sku = new SKU

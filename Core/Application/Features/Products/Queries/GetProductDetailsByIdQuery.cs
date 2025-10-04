@@ -76,9 +76,16 @@ public class GetProductDetailsByIdQueryHandler : IRequestHandler<GetProductDetai
             Values = x.Values.Select(v => new ProductAttributeValueDto
             {
                 Id = v.Id,
+                AttributeId = x.Id,
                 Value = v.Value,
             }).ToList(),
         }).ToListAsync();
+
+        foreach (var item in attributes)
+        {
+            var first = item.Values.First();
+            first.IsSelected = true;
+        }
 
         product.Attributes = attributes;
 

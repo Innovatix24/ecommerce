@@ -13,5 +13,7 @@ public class ProductAttributeDto
 public class ProductAttributeValueDto
 {
     public int Id { get; set; }
+    public short AttributeId { get; set; }
     public string Value { get; set; } = "";
+    public bool IsSelected { get; set; }
 }

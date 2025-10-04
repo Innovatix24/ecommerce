@@ -1,5 +1,6 @@
 ﻿@page "/products/{productId:int}/details"
 @using Application.Features.Attributes.DTOs
+@using Application.Features.Inventories
 @using Application.Features.Products.DTOs
 @using Application.Features.Products.Queries
 @using BongoEcom.Components.Common
@@ -48,8 +49,8 @@
                             <div class="d-flex flex-wrap gap-2 mt-1">
                                 @foreach (var val in attr.Values)
                                 {
-                                    var selected = SelectedAttributes.TryGetValue(attr.Name, out var selectedVal) && selectedVal == val;
-                                    <FluentBadge OnClick="@(() => SelectAttribute(attr.Name, val))" Circular=true Appearance="@(selected? Appearance.Accent : Appearance.Neutral)">
+                                    @* var selected = SelectedAttributes.TryGetValue(attr.Name, out var selectedVal) && selectedVal == val; *@
+                                    <FluentBadge OnClick="@(() => SelectAttribute(attr.Name, val))" Circular=true Appearance="@(val.IsSelected? Appearance.Accent : Appearance.Neutral)">
                                         @val.Value
                                     </FluentBadge>
                                 }
@@ -118,6 +119,9 @@
 
     List<string> imagesUrls = new();
 
+    List<SKUDto> sKUs = new();
+    List<ProductAttributeValueDto> selectedValues = new();
+
     protected override async Task OnInitializedAsync()
     {
         var query = new GetProductDetailsByIdQuery((short)ProductId);
@@ -129,14 +133,65 @@
 
             imagesUrls = Product.Images.Select(x => x.Url).ToList();
         }
+
+        var response = await _mediator.Send(new GetSKUsByProductIdQuery((short)ProductId));
+        if (response.Succeeded)
+        {
+            sKUs = response.Data ?? new();
+        }
+
+        SetSelectedAttributes();
+
         isLoading = false;
+    }
+
+    private void SetSelectedAttributes()
+    {
+        selectedValues.Clear();
+        foreach (var att in Product.Attributes)
+        {
+            var value = att.Values.Where(x => x.IsSelected).First();
+            selectedValues.Add(value);
+        }
     }
 
     private Dictionary<string, ProductAttributeValueDto> SelectedAttributes = new();
 
     private void SelectAttribute(string attributeName, ProductAttributeValueDto value)
     {
+        var att = Product?.Attributes.Where(x => x.Id == value.AttributeId).FirstOrDefault();
+
+        if(att != null)
+        {
+            att.Values.ForEach(x=> x.IsSelected = false);
+        }
+        value.IsSelected = true;
+
         SelectedAttributes[attributeName] = value;
+
+        SKUDto sku = GetSku();
+    }
+
+    private SKUDto GetSku()
+    {
+        var code = GetCode();
+        var sku = sKUs.FirstOrDefault(x => x.SKUCode == code.ToUpper());
+        if (sku == null)
+        {
+            return new SKUDto();
+        }
+        return sku;
+    }
+
+    private string GetCode()
+    {
+        var str = $"{Product.Id}-";
+        var ordered = selectedValues.OrderBy(x => x.AttributeId).ToList();
+        foreach (var item in ordered)
+        {
+            str += item.Value + "-";
+        }
+        return str.Trim('-');
     }
 
     private void SelectImage(string url)
