@@ -94,4 +94,13 @@ public partial class ProductSKUsPageComponent
     {
 
     }
+
+    private async Task CreateSKUs()
+    {
+        var response = await _mediator.Send(new CreateProductSKUsCommand((short)ProductId));
+        if (response.Succeeded)
+        {
+            await LoadDashboardData((short)ProductId);
+        }
+    }
 }

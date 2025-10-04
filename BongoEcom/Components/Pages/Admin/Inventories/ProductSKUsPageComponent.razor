@@ -12,8 +12,9 @@
 <PageTitle>Product SKUs</PageTitle>
 
 <div class="card p-4">
-    <div>
+    <div style="display:flex; justify-content:space-between;">
         <h3>Product : @(product.Name)</h3>
+        <FluentButton @onclick=@(CreateSKUs) Color="Color.Error">Create SKU</FluentButton>
     </div>
     <FluentDataGrid Items="SKUs.AsQueryable()"
                     TGridItem="SKUDto"
