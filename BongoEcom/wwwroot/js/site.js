@@ -6,10 +6,20 @@ window.bootstrapInterop = {
     },
     hideModal: (selector) => {
         //const myModal = bootstrap.Modal.getInstance(document.querySelector(selector));
-        var element = document.querySelector(selector);
-        element.classList.remove("show");
+        //var element = document.querySelector(selector);
+        //element.classList.remove("show");
+        //element.style.display = "none";
         //console.log(element);
         //if (myModal) myModal.hide();
+
+        var element = document.querySelector(selector);
+        element.style.display = "none";
+        element.classList.remove("show");
+        document.body.classList.remove("modal-open");
+        var backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
     }
 };
 
