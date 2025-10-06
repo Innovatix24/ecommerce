@@ -20,17 +20,28 @@ public class GetAttributesQueryHandler : IRequestHandler<GetAttributesQuery, Res
         {
             using var context = _contextFactory.CreateDbContext();
 
-            var categories = await context.Attributes
-                .Select(c => new AttributeDto
+            var attributes = await context.Attributes
+                .Include(a => a.Values)
+                .Select(a => new AttributeDto
                 {
-                    Id = c.Id,
-                    Name = c.Name,
-                    InputType = c.InputType ?? "",
-                    DataType = c.DataType ?? ""
+                    Id = a.Id,
+                    GroupId = a.GroupId,
+                    Name = a.Name,
+                    InputType = "",
+                    DataType = "", 
+                    Values = a.Values
+                      .OrderBy(v => v.DisplayOrder)
+                      .Select(v => new AttributeValueDto
+                      {
+                          Id = v.Id,
+                          Value = v.Value,
+                          DisplayOrder = v.DisplayOrder
+                      })
+                      .ToList()
                 })
                 .ToListAsync(cancellationToken);
 
-            return Result<List<AttributeDto>>.Success(categories);
+            return Result<List<AttributeDto>>.Success(attributes);
         }
         catch (Exception ex)
         {

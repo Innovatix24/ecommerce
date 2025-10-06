@@ -2,6 +2,8 @@
 @page "/admin/products/create"
 @using Application.Features.Products.Commands
 @using Application.Features.Categories.DTOs;
+@using Application.Features.Attributes.Queries;
+@using Application.Features.Attributes.Queries;
 @using Application.Features.Products.DTOs
 @using BongoEcom.Components.Inputs
 
@@ -21,7 +23,7 @@
                 <InputText @bind-Value="Command.Name" id="productName" class="form-control" placeholder="Enter product name" />
             </div>
             <div class="col-md-6">
-                <label for="productNameBangla" class="form-label">Product Name</label>
+                <label for="productNameBangla" class="form-label">Product Name (Bangla)</label>
                 <InputText @bind-Value="Command.NameBangla" id="productNameBangla" class="form-control" placeholder="Enter product name" />
             </div>
             <div class="col-md-3">
@@ -53,6 +55,18 @@
                     Multiple="false"
                     @bind-SelectedOption=@Category
                     TOption="CategoryDto" />
+            </div>
+            <div class="mb-3">
+                <FluentCombobox Items=@Groups
+                                Width="200px"
+                                OptionText="@(i => i.Name)"
+                                Label="Outlet"
+                                SelectedOption="@group"
+                                SelectedOptionChanged="@(async x => SelectAttributeGroup(x))"
+                                Height="200px"
+                                Disabled=@(Groups == null)
+                                Autocomplete="ComboboxAutocomplete.Both"
+                                TOption="AttributeGroupDto" />
             </div>
         </div>
 

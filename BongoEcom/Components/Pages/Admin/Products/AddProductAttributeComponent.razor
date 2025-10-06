@@ -1,10 +1,12 @@
 ﻿@using Application.Features.Attributes.DTOs
 @using Application.Features.Products.Commands
+@using Application.Features.Attributes.Queries;
 @using Application.Features.Products.DTOs
 @using BongoEcom.Components.Common
 @using BongoEcom.Services
 @rendermode InteractiveServer
 @inject IDialogService dialogueService
+
 @* @inject JSHelper js *@
 
 <FluentDialogFooter>
@@ -13,6 +15,18 @@
 </FluentDialogFooter>
 
 <FluentDialogBody>
+    <div class="mb-3">
+        <FluentCombobox Items=@Groups
+                        Width="200px"
+                        OptionText="@(i => i.Name)"
+                        Label="Outlet"
+                        SelectedOption="@group"
+                        SelectedOptionChanged="@(async x => SelectAttributeGroup(x))"
+                        Height="200px"
+                        Disabled=@(Groups == null)
+                        Autocomplete="ComboboxAutocomplete.Both"
+                        TOption="AttributeGroupDto" />
+    </div>
     <div>
         <FluentCombobox Items=@Attributes
             Width="200px"
@@ -21,18 +35,39 @@
             SelectedOption="@Attribute"
             SelectedOptionChanged="@(async x => SelectAttribute(x))"
             Height="200px"
-            Disabled=@(Attributes == null)
+            Disabled=@(FilteredAttributes == null)
             Autocomplete="ComboboxAutocomplete.Both"
             TOption="AttributeDto" />
     </div>
 
-        <FluentTextField 
-            Label="Value"
-            Value="@(value.Value)"
-            AutoComplete="off"
-            @oninput=@HandleValueInput
-            @onkeyup=@HandleValueKeyUp/>
+    @if (Attribute != null && Attribute.Values.Any())
+    {
+        <div>
+            <FluentStack Style="margin: 20px;" Orientation="Orientation.Vertical">
 
+@*                 <FluentCheckbox Label="@($"All")"
+                                ThreeState="true"
+                                ShowIndeterminate="false"
+                                @bind-CheckState="AreAllTypesVisible" /> *@
+
+                @foreach (var option in Attribute.Values)
+                {
+                    <FluentCheckbox Label="@($"{option.Value}")"
+                                    @bind-Value:get="option.IsSelected"
+                                    @bind-Value:set="c => OnOptionSelected(option, c)" />
+                }
+            </FluentStack>
+        </div>
+    }
+    
+    <div>
+        <FluentTextField Label="Value"
+                         Value="@(value.Value)"
+                         AutoComplete="off"
+                         @oninput=@HandleValueInput
+                         @onkeyup=@HandleValueKeyUp />
+    </div>
+        
     <div>
         @foreach(var item in Values){
             <ChipComponent Icon="bi bi-tag" OnRemove="() => RemoveTag(item)">
@@ -47,6 +82,7 @@
     ProductAttributeValueDto value = new();
     List<ProductAttributeValueDto> Values = new();
     List<AttributeDto> Attributes = new();
+    List<AttributeDto> FilteredAttributes = new();
 
     AttributeDto? Attribute = new();
 
@@ -70,8 +106,23 @@
         Attribute = item;
     }
 
+    public void OnOptionSelected(AttributeValueDto value, bool isSelected)
+    {
+        value.IsSelected = isSelected;
+    }
+
     private async void AddItemAsync()
     {
+        if (Values.Count == 0 && Attribute != null && Attribute.Values.Any())
+        {
+            Values = Attribute.Values
+            .Where(x=> x.IsSelected)
+            .Select(x => new ProductAttributeValueDto
+            {
+                Value = x.Value
+            }).ToList();
+        }
+
         if(Content == null || Content.Id == 0) 
         {
             Content = new();

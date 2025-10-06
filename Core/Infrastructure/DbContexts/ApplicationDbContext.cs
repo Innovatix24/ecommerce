@@ -8,12 +8,13 @@ using Domain.Entities.Location;
 using Domain.Entities.MyApp;
 using Domain.Entities.Orders;
 using Domain.Entities.Products;
+using Domain.Entities.Products.Attributes;
 using Domain.Entities.Site;
 using Infrastructure.DbContexts.Seeder;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Attribute = Domain.Entities.Products.Attribute;
+using Attribute = Domain.Entities.Products.Attributes.Attribute;
 
 namespace Infrastructure.DbContexts;
 
@@ -49,6 +50,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductVariant> ProductVariants { get; set; }
     public DbSet<Attribute> Attributes { get; set; }
+    public DbSet<AttributeGroup> AttributeGroups { get; set; }
     public DbSet<AttributeValue> AttributeValues { get; set; }
     public DbSet<CategoryAttribute> CategoryAttributes { get; set; }
     public DbSet<Customer> Customers { get; set; }

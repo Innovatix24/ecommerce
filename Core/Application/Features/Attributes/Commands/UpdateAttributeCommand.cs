@@ -8,8 +8,7 @@ public class UpdateAttributeCommand : IRequest<Result>
 {
     public short Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string DataType { get; set; } = string.Empty;
-    public string InputType { get; set; } = string.Empty;
+    public bool IsVariantable { get; set; } = true;
 }
 
 public class UpdateAttributeCommandHandler : IRequestHandler<UpdateAttributeCommand, Result>
@@ -36,8 +35,7 @@ public class UpdateAttributeCommandHandler : IRequestHandler<UpdateAttributeComm
             return Result.Failure("Another attribute with the same name already exists.");
 
         attribute.Name = request.Name.Trim();
-        attribute.InputType = request.InputType.Trim();
-        attribute.DataType = request.DataType.Trim();
+        attribute.IsVariantable = request.IsVariantable;
 
         await _context.SaveChangesAsync(cancellationToken);
 

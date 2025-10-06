@@ -1,8 +1,6 @@
 ﻿
-
 using Application.Features.Products.DTOs;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Internal;
 
 namespace Application.Features.Products.Queries;
 

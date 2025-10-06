@@ -1,5 +1,6 @@
 ﻿@page "/admin/attributes";
 @using Application.Features.Attributes.DTOs
+@using Application.Features.Attributes.Queries;
 @rendermode InteractiveServer
 
 @inject IDialogService DialogService;
@@ -9,11 +10,7 @@
 
 <div class="card">
     <div class="card-body">
-        <div style="display:flex; justify-content:space-between;">
-            <h3>Attribute List</h3>
-            <FluentButton @onclick=@CreateItem Color="White" BackgroundColor="Teal">Create Attribute</FluentButton>
-        </div>
-
+        
         @if (IsLoading)
         {
             <p><em>Loading...</em></p>
@@ -24,33 +21,67 @@
         }
         else
         {
-            <div style="height:85vh;">
-                <FluentDataGrid Items="Attributes?.AsQueryable()"
-                                TGridItem="AttributeDto"
-                                Pagination="@pagination"
-                                RowSize="@rowSize"
-                                AutoItemsPerPage="true"
-                                Style="overflow-y:hidden;">
-                    @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
-                    <TemplateColumn Width="60px" Title="Sl">
-                        <p>@(Attributes?.IndexOf(context) + 1)</p>
-                    </TemplateColumn>
-                     <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
-                    <PropertyColumn Property="@(c => c.InputType)" Sortable="true" />
-                    <PropertyColumn Property="@(c => c.DataType)" Sortable="true" />
-                    <TemplateColumn Title="Action">
-                        <div style="display:flex;">
-                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
-                                          Title="Edit"
-                                          OnClick="@(() => EditItem(context))" />
-                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                          Title="Delete"
-                                          Color="Color.Error"
-                                          OnClick="@(() => DeleteAttribute(context.Id))" />
-                        </div>
-                    </TemplateColumn>
-                </FluentDataGrid>
-                <FluentPaginator State="@pagination" />
+            <div class="row" style="height:85vh;">
+                <div class="col-md-4">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h3>Attribute Groups</h3>
+                        <FluentButton @onclick=@CreateItem Color="White" BackgroundColor="Teal">Create Group</FluentButton>
+                    </div>
+                    <FluentDataGrid Items="Groups?.AsQueryable()"
+                                    TGridItem="AttributeGroupDto"
+                                    RowSize="@rowSize"
+                                    AutoItemsPerPage="true"
+                                    Style="overflow-y:hidden;">
+                        @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
+                        <TemplateColumn Width="60px" Title="Sl">
+                            <p>@(Groups?.IndexOf(context) + 1)</p>
+                        </TemplateColumn>
+                        <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
+                        <TemplateColumn Title="Action">
+                            <div style="display:flex;">
+                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                              Title="Edit"
+                                              OnClick="@(() => EditGroup(context))" />
+                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                              Title="Delete"
+                                              Color="Color.Error"
+                                              OnClick="@(() => DeleteAttribute(context.Id))" />
+                            </div>
+                        </TemplateColumn>
+                    </FluentDataGrid>
+                </div>
+                <div class="col-md-8">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h3>Attribute List</h3>
+                        <FluentButton @onclick=@CreateItem Color="White" BackgroundColor="Teal">Create Attribute</FluentButton>
+                    </div>
+                    <FluentDataGrid Items="Attributes?.AsQueryable()"
+                                    TGridItem="AttributeDto"
+                                    Pagination="@pagination"
+                                    RowSize="@rowSize"
+                                    AutoItemsPerPage="true"
+                                    Style="overflow-y:hidden;">
+                        @* <PropertyColumn Width="60px" Property="@(c => c.Id)" Sortable="true" /> *@
+                        <TemplateColumn Width="60px" Title="Sl">
+                            <p>@(Attributes?.IndexOf(context) + 1)</p>
+                        </TemplateColumn>
+                        <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
+                        <PropertyColumn Property="@(c => c.InputType)" Sortable="true" />
+                        <PropertyColumn Property="@(c => c.DataType)" Sortable="true" />
+                        <TemplateColumn Title="Action">
+                            <div style="display:flex;">
+                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                              Title="Edit"
+                                              OnClick="@(() => EditItem(context))" />
+                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                              Title="Delete"
+                                              Color="Color.Error"
+                                              OnClick="@(() => DeleteAttribute(context.Id))" />
+                            </div>
+                        </TemplateColumn>
+                    </FluentDataGrid>
+                    <FluentPaginator State="@pagination" />
+                </div>
             </div>
         }
     </div>

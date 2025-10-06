@@ -15,16 +15,6 @@
             <InputText id="name" class="form-control" @bind-Value="Command.Name" />
         </div>
 
-        <div class="mb-3">
-            <label for="inputType" class="form-label">Input Type</label>
-            <InputText id="inputType" class="form-control" @bind-Value="Command.InputType" />
-        </div>
-
-        <div class="mb-3">
-            <label for="dataType" class="form-label">Data Type</label>
-            <InputText id="dataType" class="form-control" @bind-Value="Command.DataType" />
-        </div>
-
         <button class="btn btn-primary" type="submit">Create</button>
         <button class="btn btn-secondary ms-2" type="button" @onclick="@(() => Navigation.NavigateTo("/admin/attributes"))">Cancel</button>
 

@@ -31,4 +31,25 @@ public partial class AddProductAttributeComponent : IDialogContentComponent
 
         IsLoading = false;
     }
+
+    List<AttributeGroupDto> Groups = new List<AttributeGroupDto>();
+    private async Task LoadAttributeGroupsAsync()
+    {
+        IsLoading = true;
+        var result = await _mediator.Send(new GetAttributeGroups());
+        if (result.IsSuccess)
+        {
+            Groups = result.Data ?? [];
+        }
+        IsLoading = false;
+    }
+
+    AttributeGroupDto group = new();
+    private void SelectAttributeGroup(AttributeGroupDto item)
+    {
+        group = item;
+        FilteredAttributes = Attributes.Where(x=> x.GroupId == item.Id).ToList();
+    }
+
+    public bool? AreAllTypesVisible { get; set; }
 }

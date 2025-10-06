@@ -1,5 +1,6 @@
 ﻿
 using Domain.Entities.Categories;
+using Domain.Entities.Products.Attributes;
 
 namespace Domain.Entities.Products;
 

@@ -1,5 +1,8 @@
 ﻿
 @using Application.Features.Attributes.Commands
+@using Application.Features.Attributes.DTOs
+@using Application.Features.Attributes.Queries;
+@using BongoEcom.Components.Common
 @rendermode InteractiveServer
 
 @inject IDialogService DialogService;
@@ -9,6 +12,18 @@
 </FluentDialogFooter>
 
 <FluentDialogBody>
+    <div class="mb-3">
+        <FluentCombobox Items=@Groups
+                        Width="200px"
+                        OptionText="@(i => i.Name)"
+                        Label="Outlet"
+                        SelectedOption="@group"
+                        SelectedOptionChanged="@(async x => SelectAttributeGroup(x))"
+                        Height="200px"
+                        Disabled=@(Groups == null)
+                        Autocomplete="ComboboxAutocomplete.Both"
+                        TOption="AttributeGroupDto" />
+    </div>
     <div class="mb-3">
         <label for="name" class="form-label">Name</label>
         <InputText id="name" class="form-control" @bind-Value="Content.Name" />
@@ -23,20 +38,38 @@
         <label for="dataType" class="form-label">Data Type</label>
         <InputText id="dataType" class="form-control" @bind-Value="Content.DataType" />
     </div>
+
+    <div>
+        <FluentTextField Label="Value"
+                         Value="@(Value.Value)"
+                         AutoComplete="off"
+                         @oninput=@HandleValueInput
+                         @onkeyup=@HandleValueKeyUp />
+    </div>
+        
+    <div>
+        @foreach(var item in Content.Values){
+            <ChipComponent Icon="bi bi-tag" OnRemove="() => RemoveTag(item)">
+                @(item.Value)
+            </ChipComponent>
+        }
+    </div>
+
 </FluentDialogBody>
 
 
-
-
 @code {
+    AttributeValueDto Value = new();
+    List<AttributeValueDto> Values = new();
+
     private async Task HandleValidSubmit()
     {
         var command = new CreateAttributeCommand
         {
             Id = Content.Id,
+            GroupId = Content.GroupId,
             Name = Content.Name,
-            DataType = Content.DataType,
-            InputType = Content.InputType,
+            Values = Values
         };
 
         var response = await _mediator.Send(command);
@@ -45,6 +78,25 @@
         {
             await Dialog.CloseAsync("Saved successfully");
             await UIService.ShowSuccessAsync("Saved successfully");
+        }
+    }
+
+    private void RemoveTag(AttributeValueDto item)
+    {
+        Values.Remove(item);
+    }
+
+    private void HandleValueInput(ChangeEventArgs e)
+    {
+        if (e.Value is null) return;
+        Value.Value = e.Value.ToString() ?? "";
+    }
+    private void HandleValueKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Values.Add(Value);
+            Value = new();
         }
     }
 }

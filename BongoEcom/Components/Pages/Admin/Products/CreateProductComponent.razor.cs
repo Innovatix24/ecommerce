@@ -1,4 +1,5 @@
-﻿using Application.Features.Categories.DTOs;
+﻿using Application.Features.Attributes.Queries;
+using Application.Features.Categories.DTOs;
 using Application.Features.Categories.Queries;
 using Application.Features.Products.DTOs;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -15,9 +16,30 @@ public partial class CreateProductComponent
         if (firstRender)
         {
             await LoadCategories();
+            await LoadAttributeGroupsAsync();
             StateHasChanged();
         }
         await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+    bool IsLoading = false;
+    List<AttributeGroupDto> Groups = new List<AttributeGroupDto>();
+    private async Task LoadAttributeGroupsAsync()
+    {
+        IsLoading = true;
+        var result = await _mediator.Send(new GetAttributeGroups());
+        if (result.IsSuccess)
+        {
+            Groups = result.Data ?? [];
+        }
+        IsLoading = false;
+    }
+
+    AttributeGroupDto group = new();
+    private void SelectAttributeGroup(AttributeGroupDto item)
+    {
+        group = item;
     }
 
     private async Task LoadCategories() 
