@@ -19,7 +19,36 @@ public partial class AddProductAttributeComponent : IDialogContentComponent
         
     }
 
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadAttributesAsync();
+            await LoadAttributeGroupsAsync();
+
+            if (Content is not null)
+            {
+                Values = Content.Values;
+                Attribute = Attributes.Where(x => x.Id == Content.AttributeId).FirstOrDefault();
+            }
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
     bool IsLoading = false;
+    List<AttributeGroupDto> Groups = new List<AttributeGroupDto>();
+
+    private async Task LoadAttributeGroupsAsync()
+    {
+        IsLoading = true;
+        var result = await _mediator.Send(new GetAttributeGroups());
+        if (result.IsSuccess)
+        {
+            Groups = result.Data ?? [];
+        }
+        IsLoading = false;
+    }
     private async Task LoadAttributesAsync()
     {
         IsLoading = true;
@@ -29,18 +58,6 @@ public partial class AddProductAttributeComponent : IDialogContentComponent
             Attributes = result.Data ?? [];
         }
 
-        IsLoading = false;
-    }
-
-    List<AttributeGroupDto> Groups = new List<AttributeGroupDto>();
-    private async Task LoadAttributeGroupsAsync()
-    {
-        IsLoading = true;
-        var result = await _mediator.Send(new GetAttributeGroups());
-        if (result.IsSuccess)
-        {
-            Groups = result.Data ?? [];
-        }
         IsLoading = false;
     }
 

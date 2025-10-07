@@ -10,38 +10,7 @@
 <div class="card">
     <div class="card-body">
         <div class="row">
-            <div class="col-md-4">
-                <div style="display:flex; justify-content:space-between;">
-                    <h3>Attribute Groups</h3>
-                    <FluentButton @onclick=@CreateGroup Color="White" BackgroundColor="Teal">Create Group</FluentButton>
-                </div>
-                <div style="height:85vh;">
-                    <FluentDataGrid Items="Groups?.AsQueryable()"
-                                    TGridItem="AttributeGroupDto"
-                                    RowSize="@rowSize"
-                                    Pagination="@groupPagination"
-                                    AutoItemsPerPage="true"
-                                    Style="overflow-y:hidden;">
-                        <TemplateColumn Width="60px" Title="Sl">
-                            <p>@(Groups?.IndexOf(context) + 1)</p>
-                        </TemplateColumn>
-                        <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
-                        <TemplateColumn Title="Action">
-                            <div style="display:flex;">
-                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
-                                              Title="Edit"
-                                              OnClick="@(() => EditGroup(context))" />
-                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                              Title="Delete"
-                                              Color="Color.Error"
-                                              OnClick="@(() => DeleteAttribute(context.Id))" />
-                            </div>
-                        </TemplateColumn>
-                    </FluentDataGrid>
-                    <FluentPaginator State="@groupPagination" />
-                </div>
-            </div>
-            <div class="col-md-8">
+            <div>
                 <div style="display:flex; justify-content:space-between;">
                     <h3>Attribute List</h3>
                     <FluentButton @onclick=@Create Color="Color.Error">Create Category</FluentButton>
@@ -82,7 +51,19 @@
                             <TemplateColumn Width="60px" Title="Sl">
                                 <p>@(FilteredAttributes?.IndexOf(context) + 1)</p>
                             </TemplateColumn>
-                            <PropertyColumn Property="@(c => c.Name)" Sortable="true" />
+                            <PropertyColumn Property="@(c => c.Name)" Title="Attribute" Sortable="true" />
+                            <PropertyColumn Property="@(c => c.GroupName)" Title="Group" Sortable="true" />
+                            <TemplateColumn Title="Values">
+                                <div>
+                                    @foreach(var value in context.Values){
+                                        <div style="padding:5px; display:inline-block;">
+                                            <FluentBadge Appearance="Appearance.Neutral">
+                                                @value.Value
+                                            </FluentBadge>
+                                        </div>
+                                    }
+                                </div>
+                            </TemplateColumn>
                             <TemplateColumn Title="Action">
                                 <div style="display:flex;">
                                     <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"

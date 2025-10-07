@@ -21,11 +21,13 @@ public class GetAttributesQueryHandler : IRequestHandler<GetAttributesQuery, Res
             using var context = _contextFactory.CreateDbContext();
 
             var attributes = await context.Attributes
+                .Include(x=> x.Group)
                 .Include(a => a.Values)
                 .Select(a => new AttributeDto
                 {
                     Id = a.Id,
                     GroupId = a.GroupId,
+                    GroupName = a.Group.Name,
                     Name = a.Name,
                     InputType = "",
                     DataType = "", 

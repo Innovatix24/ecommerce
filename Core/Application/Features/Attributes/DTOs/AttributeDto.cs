@@ -8,6 +8,7 @@ public class AttributeDto
     public string DataType { get; set; } = string.Empty;
     public string InputType { get; set; } = string.Empty;
     public short GroupId { get; set; }
+    public string GroupName { get; set; } = string.Empty;
     public List<AttributeValueDto> Values { get; set; } = new();
 }
 

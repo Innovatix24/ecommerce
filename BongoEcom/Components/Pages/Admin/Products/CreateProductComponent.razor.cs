@@ -145,7 +145,7 @@ public partial class CreateProductComponent
         }
     }
 
-    private async Task OpenAddAttributeModal()
+    private async Task OpenAddAttributeModal(ProductAttributeDto? item = null)
     {
         DialogParameters parameters = new()
         {
@@ -159,10 +159,13 @@ public partial class CreateProductComponent
             PreventScroll = true
         };
 
-        var item = new ProductAttributeDto()
+        if(item == null)
         {
-            Name = "",
-        };
+            item = new ProductAttributeDto()
+            {
+                Name = "",
+            };
+        }
 
         IDialogReference dialog = await dialogService.ShowDialogAsync<AddProductAttributeComponent>(item, parameters);
         DialogResult? result = await dialog.Result;

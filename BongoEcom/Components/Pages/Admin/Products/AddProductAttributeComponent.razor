@@ -15,67 +15,53 @@
 </FluentDialogFooter>
 
 <FluentDialogBody>
-    <div class="mb-3">
-        <FluentCombobox Items=@Groups
-                        Width="200px"
-                        OptionText="@(i => i.Name)"
-                        Label="Outlet"
-                        SelectedOption="@group"
-                        SelectedOptionChanged="@(async x => SelectAttributeGroup(x))"
-                        Height="200px"
-                        Disabled=@(Groups == null)
-                        Autocomplete="ComboboxAutocomplete.Both"
-                        TOption="AttributeGroupDto" />
-    </div>
-    <div>
-        <FluentCombobox Items=@Attributes
-            Width="200px"
-            OptionText="@(i => i.Name)"
-            Label="Outlet"
-            SelectedOption="@Attribute"
-            SelectedOptionChanged="@(async x => SelectAttribute(x))"
-            Height="200px"
-            Disabled=@(FilteredAttributes == null)
-            Autocomplete="ComboboxAutocomplete.Both"
-            TOption="AttributeDto" />
-    </div>
-
-    @if (Attribute != null && Attribute.Values.Any())
-    {
+    <div style="min-height:300px;">
+        <div class="mb-3">
+            <FluentCombobox Items=@Groups
+                            Width="400px"
+                            OptionText="@(i => i.Name)"
+                            Label="Attribute Group"
+                            SelectedOptionChanged="@(async x => SelectAttributeGroup(x))"
+                            Height="200px"
+                            Disabled=@(Groups == null)
+                            Autocomplete="ComboboxAutocomplete.Both"
+                            TOption="AttributeGroupDto" />
+        </div>
         <div>
-            <FluentStack Style="margin: 20px;" Orientation="Orientation.Vertical">
+            <FluentCombobox Items=@FilteredAttributes
+                            Width="400px"
+                            OptionText="@(i => i.Name)"
+                            Label="Attribute"
+                            SelectedOption="@Attribute"
+                            SelectedOptionChanged="@(async x => SelectAttribute(x))"
+                            Height="200px"
+                            Disabled=@(FilteredAttributes == null)
+                            Autocomplete="ComboboxAutocomplete.Both"
+                            TOption="AttributeDto" />
+        </div>
 
-@*                 <FluentCheckbox Label="@($"All")"
+        @if (Attribute != null && Attribute.Values.Any())
+        {
+            <br />
+            <p>Select Attribute Values</p>
+            <div>
+                <FluentStack Style="margin: 20px;" Orientation="Orientation.Vertical">
+
+                    @*                 <FluentCheckbox Label="@($"All")"
                                 ThreeState="true"
                                 ShowIndeterminate="false"
                                 @bind-CheckState="AreAllTypesVisible" /> *@
 
-                @foreach (var option in Attribute.Values)
-                {
-                    <FluentCheckbox Label="@($"{option.Value}")"
-                                    @bind-Value:get="option.IsSelected"
-                                    @bind-Value:set="c => OnOptionSelected(option, c)" />
-                }
-            </FluentStack>
-        </div>
-    }
-    
-    <div>
-        <FluentTextField Label="Value"
-                         Value="@(value.Value)"
-                         AutoComplete="off"
-                         @oninput=@HandleValueInput
-                         @onkeyup=@HandleValueKeyUp />
-    </div>
-        
-    <div>
-        @foreach(var item in Values){
-            <ChipComponent Icon="bi bi-tag" OnRemove="() => RemoveTag(item)">
-                @(item.Value)
-            </ChipComponent>
+                    @foreach (var option in Attribute.Values)
+                    {
+                        <FluentCheckbox Label="@($"{option.Value}")"
+                                        @bind-Value:get="option.IsSelected"
+                                        @bind-Value:set="c => OnOptionSelected(option, c)" />
+                    }
+                </FluentStack>
+            </div>
         }
     </div>
-
 </FluentDialogBody>
 
 @code{
@@ -86,20 +72,6 @@
 
     AttributeDto? Attribute = new();
 
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if(firstRender)
-        {
-            await LoadAttributesAsync();
-
-            if(Content is not null){
-                Values = Content.Values;
-                Attribute = Attributes.Where(x => x.Id == Content.AttributeId).FirstOrDefault();
-            }
-            StateHasChanged();
-        }
-        await base.OnAfterRenderAsync(firstRender);
-    }
 
     private void SelectAttribute(AttributeDto item)
     {
