@@ -1,0 +1,76 @@
+﻿@page "/admin/attribute/form";
+@page "/admin/attribute/form/{AttributeId:int}";
+@using Application.Features.Attributes.DTOs
+@using Application.Features.Attributes.Queries;
+@using BongoEcom.Components.Common
+@rendermode InteractiveServer
+
+@inject IDialogService DialogService;
+
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <FluentCombobox Items=@Groups
+                            Width="200px"
+                            OptionText="@(i => i.Name)"
+                            Label="Group"
+                            @bind-SelectedOption="@group"
+                            Height="200px"
+                            Disabled=@(Groups.Count == 0)
+                            Autocomplete="ComboboxAutocomplete.Both"
+                            TOption="AttributeGroupDto" />
+        </div>
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <InputText id="name" class="form-control" @bind-Value="Content.Name" />
+        </div>
+
+        <div>
+            <FluentTextField Label="Value"
+                             Value="@(Value.Value)"
+                             AutoComplete="off"
+                             @oninput=@HandleValueInput
+                             @onkeyup=@HandleValueKeyUp />
+        </div>
+
+        <div class="mb-3">
+            @foreach (var item in Content.Values)
+            {
+                <ChipComponent Icon="bi bi-tag" OnRemove="() => RemoveTag(item)">
+                    @(item.Value)
+                </ChipComponent>
+            }
+        </div>
+        <div class="mb-3">
+            <FluentButton BackgroundColor="Green" Appearance="Appearance.Accent" OnClick="@(() => HandleValidSubmit())">Save</FluentButton>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    DataGridRowSize rowSize = DataGridRowSize.Medium;
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+
+    AttributeValueDto Value = new();
+    List<AttributeValueDto> Values = new();
+
+    private void RemoveTag(AttributeValueDto item)
+    {
+        Content.Values.Remove(item);
+    }
+
+    private void HandleValueInput(ChangeEventArgs e)
+    {
+        if (e.Value is null) return;
+        Value.Value = e.Value.ToString() ?? "";
+    }
+    private void HandleValueKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            Content.Values.Add(Value);
+            Value = new();
+        }
+    }
+}

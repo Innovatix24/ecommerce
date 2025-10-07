@@ -12,7 +12,7 @@
 </FluentDialogFooter>
 
 <FluentDialogBody>
-    <div class="mb-3">
+@*     <div class="mb-3">
         <FluentCombobox Items=@Groups
                         Width="200px"
                         OptionText="@(i => i.Name)"
@@ -23,7 +23,7 @@
                         Disabled=@(Groups == null)
                         Autocomplete="ComboboxAutocomplete.Both"
                         TOption="AttributeGroupDto" />
-    </div>
+    </div> *@
     <div class="mb-3">
         <label for="name" class="form-label">Name</label>
         <InputText id="name" class="form-control" @bind-Value="Content.Name" />

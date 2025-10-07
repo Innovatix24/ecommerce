@@ -30,7 +30,7 @@ public class CreateAttributeCommandHandler : IRequestHandler<CreateAttributeComm
         if (string.IsNullOrWhiteSpace(request.Name))
             return Result<short>.Failure("Attribute name is required.");
 
-        bool nameExists = _context.Attributes.Any(c => c.Name == request.Name);
+        bool nameExists = _context.Attributes.Any(c => c.Name == request.Name && c.GroupId == request.GroupId);
         if (nameExists)
             return Result<short>.Failure("Attribute name already exists.");
 

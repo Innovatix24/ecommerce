@@ -7,21 +7,19 @@ using Microsoft.JSInterop;
 
 namespace BongoEcom.Components.Pages.Admin.Attributes;
 
-public partial class AttributesPage
+public partial class AttributePageComponent
 {
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     private List<AttributeDto> Attributes = new();
+    private List<AttributeDto> FilteredAttributes = new();
     private List<AttributeGroupDto> Groups = new();
     private bool IsLoading = true;
     private string Message = string.Empty;
 
-    DataGridRowSize rowSize = DataGridRowSize.Medium;
-    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
-
     protected override async Task OnInitializedAsync()
     {
-        
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -42,6 +40,15 @@ public partial class AttributesPage
         if (result.IsSuccess)
         {
             Attributes = result.Data ?? [];
+
+            if (group.Id == 0)
+            {
+                FilteredAttributes = Attributes;
+            }
+            else
+            {
+                FilteredAttributes = Attributes.Where(x => x.GroupId == group.Id).ToList();
+            }
         }
         else
         {
@@ -82,7 +89,10 @@ public partial class AttributesPage
         }
     }
 
-    public async Task CreateItem()
+    private void Create() => Navigation.NavigateTo($"/admin/attribute/form");
+    private void Edit(int id) => Navigation.NavigateTo($"/admin/attribute/form/{id}");
+
+    public async Task CreateAttribute()
     {
         await OpenModal("Create Attribute");
     }
@@ -161,5 +171,20 @@ public partial class AttributesPage
             await LoadAttributeGroupsAsync();
             StateHasChanged();
         }
+    }
+
+    AttributeGroupDto group = new();
+    private void SelectAttributeGroup(AttributeGroupDto item)
+    {
+        if (item is null) return;
+        group = item;
+        if(item.Id == 0)
+        {
+            FilteredAttributes = Attributes;
+        }
+        else
+        {
+            FilteredAttributes = Attributes.Where(x => x.GroupId == item.Id).ToList();
+        }  
     }
 }

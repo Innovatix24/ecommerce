@@ -18,7 +18,7 @@ public partial class AttributeFormModal : IDialogContentComponent<AttributeDto>
     {
         if (firstRender)
         {
-            await LoadAttributeGroupsAsync();
+            //await LoadAttributeGroupsAsync();
             StateHasChanged();
         }
         await base.OnAfterRenderAsync(firstRender);
