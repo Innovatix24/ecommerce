@@ -1,10 +1,15 @@
-using Blazored.Toast;
+
 using BongoEcom;
 using BongoEcom.Components;
 using BongoEcom.Services.Contracts;
 using Infrastructure;
+using QuestPDF.Drawing;
 
 var builder = WebApplication.CreateBuilder(args);
+
+FontManager.RegisterFont(
+    File.OpenRead("/usr/share/fonts/truetype/siyam-rupali/SiyamRupali.ttf")
+);
 
 builder.AddBongoEcom()
     .AddInfrastructure();
