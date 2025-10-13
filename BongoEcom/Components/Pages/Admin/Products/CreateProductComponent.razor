@@ -4,6 +4,7 @@
 @using Application.Features.Categories.DTOs;
 @using Application.Features.Attributes.Queries;
 @using Application.Features.Products.DTOs
+@using BongoEcom.Components.Common
 @using BongoEcom.Components.Inputs
 
 @rendermode InteractiveServer
@@ -117,13 +118,22 @@
 
         <div class="mb-4 p-2">
             <h3>Short Description</h3>
+            <SummernoteEditor @bind-Value="shortDescription" />
+        </div>
+        <div class="mb-4 p-2">
+            <h3>Description</h3>
+            <SummernoteEditor @bind-Value="longDescription" />
+        </div>
+
+@*         <div class="mb-4 p-2">
+            <h3>Short Description</h3>
             <MyTextEditor @ref="shortEditor" />
         </div>
         <div class="mb-4 p-2">
             <h3>Long Description</h3>
             <MyTextEditor @ref="editor" />
         </div>
-
+ *@
         <div class="row mt-2 p-2">
             <div class="col-12">
                 <h3>Specifications</h3>
@@ -184,8 +194,10 @@
     private CreateProductCommand Command = new();
     private CategoryDto Category { get; set; } = new();
     private short CategoryId { get; set; }
-    private MyTextEditor editor;
-    private MyTextEditor shortEditor;
+
+    private string shortDescription = "";
+    private string longDescription = "";
+
 
     DataGridRowSize rowSize = DataGridRowSize.Medium;
     private List<IBrowserFile> uploadedImages = new();

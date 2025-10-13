@@ -1,0 +1,39 @@
+﻿@inject IJSRuntime JS
+
+<div id="@EditorId"></div>
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    private string EditorId { get; } = $"editor_{Guid.NewGuid()}";
+    private DotNetObjectReference<SummernoteEditor>? dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("summernoteInterop.init", EditorId, dotNetRef);
+
+            if (!string.IsNullOrEmpty(Value))
+                await JS.InvokeVoidAsync("summernoteInterop.setContent", EditorId, Value);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnContentChanged(string content)
+    {
+        Value = content;
+        await ValueChanged.InvokeAsync(content);
+    }
+
+    public async Task<string> GetContentAsync() =>
+        await JS.InvokeAsync<string>("summernoteInterop.getContent", EditorId);
+
+    public async ValueTask DisposeAsync()
+    {
+        await JS.InvokeVoidAsync("summernoteInterop.destroy", EditorId);
+        dotNetRef?.Dispose();
+    }
+}

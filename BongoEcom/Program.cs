@@ -7,9 +7,9 @@ using QuestPDF.Drawing;
 
 var builder = WebApplication.CreateBuilder(args);
 
-FontManager.RegisterFont(
-    File.OpenRead("/usr/share/fonts/truetype/siyam-rupali/SiyamRupali.ttf")
-);
+//FontManager.RegisterFont(
+//    File.OpenRead("/usr/share/fonts/truetype/siyam-rupali/SiyamRupali.ttf")
+//);
 
 builder.AddBongoEcom()
     .AddInfrastructure();

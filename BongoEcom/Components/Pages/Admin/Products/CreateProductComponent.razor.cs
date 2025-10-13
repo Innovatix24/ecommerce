@@ -84,8 +84,8 @@ public partial class CreateProductComponent
         Command.Attributes = Attributes;
         Command.Images = await AddImages();
         Command.CategoryId = Category.Id;
-        Command.ShortDescription = await shortEditor.GetHtmlAsync();
-        Command.Description = await editor.GetHtmlAsync();
+        Command.ShortDescription = shortDescription;
+        Command.Description = longDescription;
 
         var result = await _mediator.Send(Command);
         if (result.IsSuccess)
