@@ -91,3 +91,8 @@ window.getBrowserId = () => {
     }
     return browserId;
 }
+
+window.clearFileInput = (element) => {
+    console.log(element);
+    if (element) element.value = null;
+};

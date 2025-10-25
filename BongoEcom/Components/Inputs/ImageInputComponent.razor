@@ -7,7 +7,7 @@
     @if (!string.IsNullOrEmpty(Label)){
         <label class="form-label">@Label</label>
     }
-    <InputFile OnChange="HandleFilesSelected" multiple accept="image/*" />
+    <InputFile id="imageInputId" OnChange="HandleFilesSelected" multiple accept="image/*" />
 </div>
 
 @if (previewImages.Any())
@@ -43,6 +43,13 @@
                     PreviewUrl = item.Url
                 });
         }
+        StateHasChanged();
+    }
+
+    public async void ClearImages()
+    {
+        previewImages.Clear();
+        await JS.InvokeVoidAsync("clearFileInput", "imageInputId");
         StateHasChanged();
     }
 

@@ -35,7 +35,7 @@
         <div class="row">
             <div class="col-12">
                 <label class="form-label">Product Images</label>
-                <ImageInputComponent OnFilesChanged="HandleImagesUploaded" />
+                <ImageInputComponent @ref="ImageRef" OnFilesChanged="HandleImagesUploaded" />
             </div>
         </div>
 

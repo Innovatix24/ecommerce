@@ -1,9 +1,12 @@
 ﻿using Application.Features.Site.Banners;
+using BongoEcom.Components.Inputs;
+using Domain.Entities.Site;
 
 namespace BongoEcom.Components.Pages.Admin.Site.Banners;
 public partial class BannerFormComponent
 {
     BannerDto banner { get; set; } = new BannerDto();
+    ImageInputComponent ImageRef;
 
     private async Task HandleSubmit()
     {
@@ -24,11 +27,19 @@ public partial class BannerFormComponent
             DisplayOrder = banner.DisplayOrder,
             IsActive = banner.IsActive,
         };
+
+        UIService.ShowLoader("Saving...");
+
         var result = await _mediator.Send(command);
         if (result.IsSuccess)
         {
-
+            banner = new();
+            uploadedImages.Clear();
+            UIService.HideLoader();
+            ImageRef.ClearImages();
+            await UIService.ShowSuccessAsync("Banner is added");
         }
+        UIService.HideLoader();
     }
 
     private string? Validate()
@@ -39,7 +50,7 @@ public partial class BannerFormComponent
         }
         if (uploadedImages.Count == 0)
         {
-            return "Image is required is required";
+            return "Image is required";
         }
         return null;
     }

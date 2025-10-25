@@ -31,7 +31,7 @@ public class AddEditBannerCommandHandler : IRequestHandler<AddEditBannerCommand,
             {
                 Title = request.Title,
                 ImageUrl = request.ImageUrl,
-                TargetUrl = request.TargetUrl,
+                TargetUrl = request.TargetUrl ?? "",
                 DisplayOrder = request.DisplayOrder,
                 Description = request.Description?.Trim() ?? string.Empty,
                 IsActive = request.IsActive
