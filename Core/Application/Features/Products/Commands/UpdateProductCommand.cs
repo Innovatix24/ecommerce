@@ -73,6 +73,29 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                 _context.ProductImages.Add(image);
             }
 
+            var attributes = new List<ProductAttribute>();
+
+            foreach (var item in request.Attributes)
+            {
+                if(item.Id > 0)
+                {
+                    continue;
+                }
+
+                var attribute = new ProductAttribute
+                {
+                    AttributeId = item.AttributeId,
+                    ProductId = product.Id,
+                    Values = item.Values.Select(x => new ProductAttributeValue
+                    {
+                        Value = x.Value,
+                    }).ToList(),
+                };
+
+                _context.ProductAttributes.Add(attribute);
+                attributes.Add(attribute);
+            }
+
             var specs = await _context.ProductSpecifications.Where(x => x.ProductId == product.Id).ToListAsync();
             foreach (var att in specs)
             {

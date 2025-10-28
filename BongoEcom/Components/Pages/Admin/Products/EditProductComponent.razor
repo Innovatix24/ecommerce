@@ -15,77 +15,96 @@
 <div style="border-radius: 10px; padding:12px; background-color: white;">
     <div class="container">
         <h3>Edit Product</h3>
-        <div class="row mb-3">
+        <div class="row p-2">
             <div class="col-md-6">
                 <label for="productName" class="form-label">Product Name</label>
                 <InputText @bind-Value="Command.Name" id="productName" class="form-control" placeholder="Enter product name" />
             </div>
             <div class="col-md-6">
-                <label for="productNameBangla" class="form-label">Product Name</label>
+                <label for="productNameBangla" class="form-label">Product Name (Bangla)</label>
                 <InputText @bind-Value="Command.NameBangla" id="productNameBangla" class="form-control" placeholder="Enter product name" />
             </div>
-            <div class="col-md-3">
+        </div>
+        <div class="row p-2">
+            <div class="col-md-6">
                 <label for="tag" class="form-label">Tag</label>
-                <InputText @bind-Value="Command.Tag" id="tag" class="form-control" placeholder="Enter product name" />
+                <InputText @bind-Value="Command.Tag" id="tag" class="form-control" placeholder="Enter Tag" />
             </div>
             <div class="col-md-3">
-                <label for="price" class="form-label">Regular Price</label>
-                <InputNumber @bind-Value="Command.RegularPrice" id="price" class="form-control" placeholder="0.00" />
+                <label for="PurchasePrice" class="form-label">Purchase Price</label>
+                <InputNumber @bind-Value="Command.RegularPrice" id="PurchasePrice" class="form-control" placeholder="0.00" />
             </div>
             <div class="col-md-3">
                 <label for="price" class="form-label">Sale Price</label>
                 <InputNumber @bind-Value="Command.SalePrice" id="price" class="form-control" placeholder="0.00" />
             </div>
-            <div class="col-md-3">
+        </div>
+
+        <div class="row p-2">
+            <div class="col-md-6">
+                <FluentCombobox Id="@cmbCategoryId"
+                                Items=@_categories
+                                OptionText="@(i => i.Name)"
+                                Label="Select Category"
+                                Height="400px"
+                                Width="100%"
+                                Disabled=@(_categories is null || _categories.Count == 0)
+                                Autocomplete="ComboboxAutocomplete.Both"
+                                Multiple="false"
+                                @bind-SelectedOption=@Category
+                                TOption="CategoryDto" />
+            </div>
+            <div class="col-md-4">
+                <div style="height:30px;"></div>
                 <FluentCheckbox @bind-Value="@Command.InStock" Label="In Stock" />
             </div>
         </div>
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <FluentCombobox Id="@cmbCategoryId"
-                    Items=@_categories
-                    OptionText="@(i => i.Name)"
-                    Label="Select Category"
-                    Height="200px"
-                    Disabled=@(_categories is null || _categories.Count == 0)
-                    Autocomplete="ComboboxAutocomplete.Both"
-                    Multiple="false"
-                    @bind-SelectedOption=@Category
-                    TOption="CategoryDto" />
-            </div>
-        </div>
-
-        <div class="row">
+        <div class="row p-2 mt-2">
             <div class="col-12">
-                <label class="form-label">Attributes <FluentButton @onclick="@(() => AddAttribute())">Add</FluentButton> </label>
-                @if (Attributes?.Count == 0)
-                {
-                    <p><em>No attribute added.</em></p>
-                }
-                else
-                {
-                    <table class="table">
-                        <thead>
-                            <tr><th>Id</th><th>Name</th><th>Values</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var attr in Attributes)
-                            {
-                                <tr>
-                                    <td>@attr.Id</td>
-                                    <td>@attr.Name</td>
-                                    <td>@string.Join(", ", attr.Values.Select(v => v.Value))</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-warning" @onclick="() => EditAttribute(attr)">Edit</button>
-                                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteAttribute(attr)">Delete</button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                }
+                <div style="display:flex;">
+                    <h3>Attributes</h3>
+                    <div style="margin-left:12px; margin-top:5px;">
+                        <FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
+                                      @onclick="@(() => OpenAttributeModal())">Add</FluentButton>
+                    </div>
+                </div>
 
+                <div>
+                    <FluentDataGrid Items="Attributes?.AsQueryable()"
+                                    TGridItem="ProductAttributeDto"
+                                    RowSize="@rowSize"
+                                    AutoItemsPerPage="true"
+                                    Style="overflow-y:hidden;">
+                        <TemplateColumn Width="60px" Title="Sl">
+                            <p>@(Attributes?.IndexOf(context) + 1)</p>
+                        </TemplateColumn>
+                        <PropertyColumn Property="@(c => c.Name)" Title="Attribute" Sortable="true" />
+                        <TemplateColumn Title="Values">
+                            <div>
+                                @foreach (var value in context.Values)
+                                {
+                                    <div style="padding:5px; display:inline-block;">
+                                        <FluentBadge Appearance="Appearance.Neutral">
+                                            @value.Value
+                                        </FluentBadge>
+                                    </div>
+                                }
+                            </div>
+                        </TemplateColumn>
+                        <TemplateColumn Title="Action">
+                            <div style="display:flex;">
+                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                              Title="Edit"
+                                              OnClick="@(async () => await EditAttribute(context))" />
+                                <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                              Title="Delete"
+                                              Color="Color.Error"
+                                              OnClick="@(() => DeleteAttribute(context))" />
+                            </div>
+                        </TemplateColumn>
+                    </FluentDataGrid>
+                </div>
             </div>
         </div>
 
@@ -111,14 +130,13 @@
             </div>
         </div>
 
-        <div class="mb-4">
-            <label class="form-label">Short Description</label>
-            <MyTextEditor @ref="shortEditor" />
+        <div class="mb-4 p-2">
+            <h3>Short Description</h3>
+            <SummernoteEditor @bind-Value="@Command.ShortDescription" />
         </div>
-
-        <div class="mb-4">
-            <label class="form-label">Long Description</label>
-            <MyTextEditor @ref="editor" />
+        <div class="mb-4 p-2">
+            <h3>Description</h3>
+            <SummernoteEditor @bind-Value="@Command.Description" />
         </div>
 
         <div class="row mt-3">
@@ -186,6 +204,7 @@
     private MyTextEditor editor;
     private MyTextEditor shortEditor;
 
+    DataGridRowSize rowSize = DataGridRowSize.Medium;
     private List<IBrowserFile> uploadedImages = new();
 
     private void HandleImagesUploaded(List<IBrowserFile> files)

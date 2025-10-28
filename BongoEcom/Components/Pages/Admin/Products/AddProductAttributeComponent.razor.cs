@@ -29,7 +29,7 @@ public partial class AddProductAttributeComponent : IDialogContentComponent
             if (Content is not null)
             {
                 Values = Content.Values;
-                Attribute = Attributes.Where(x => x.Id == Content.AttributeId).FirstOrDefault();
+                Attribute = Attributes.Where(x => x.Id == Content.AttributeId).FirstOrDefault() ?? new();
             }
             StateHasChanged();
         }

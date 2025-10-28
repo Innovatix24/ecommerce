@@ -12,6 +12,9 @@ public partial class EditProductComponent
     List<CategoryDto> _categories { get; set; } = new();
 
     bool _isLoading = true;
+    private string shortDescription = "";
+    private string longDescription = "";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -49,8 +52,9 @@ public partial class EditProductComponent
             Command.CategoryId = Product.CategoryId;
             Command.InStock = Product.InStock;
             Command.Specifications = Product.Specifications;
-            await shortEditor.SetHtmlAsync(Product.ShortDescription);
-            await editor.SetHtmlAsync(Product.LongDescription);
+
+            //await shortEditor.SetHtmlAsync(Product.ShortDescription);
+            //await editor.SetHtmlAsync(Product.LongDescription);
 
             //ImageInputRef.SetImages(Product.Images);
 
@@ -76,8 +80,7 @@ public partial class EditProductComponent
     {
         Command.Images = await AddImages();
         Command.CategoryId = Category.Id;
-        Command.Description = await editor.GetHtmlAsync();
-        Command.ShortDescription = await shortEditor.GetHtmlAsync();
+        Command.Attributes = Attributes;
 
         UIService.ShowLoader("Updating...");
         var result = await _mediator.Send(Command);
@@ -162,13 +165,65 @@ public partial class EditProductComponent
     }
     private async Task EditAttribute(ProductAttributeDto item)
     {
-        await OpenAttributeModal(item, "Update Attribute");
+        await OpenAttributeModal(item);
     }
-    private async Task OpenAttributeModal(ProductAttributeDto? item = null, string title = "Add Attribute")
+
+
+    //private async Task OpenAttributeModal(ProductAttributeDto? item = null, string title = "Add Attribute")
+    //{
+    //    DialogParameters parameters = new()
+    //    {
+    //        Title = item == null? "Add attribute" : "Update attribute",
+    //        PrimaryAction = "Yes",
+    //        PrimaryActionEnabled = false,
+    //        SecondaryAction = "No",
+    //        Width = "450px",
+    //        TrapFocus = false,
+    //        Modal = false,
+    //        PreventScroll = true
+    //    };
+
+    //    if(item is null)
+    //    {
+    //        item = new ProductAttributeDto()
+    //        {
+    //            Name = "",
+    //        };
+    //    }
+
+    //    IDialogReference dialog = await dialogService.ShowDialogAsync<AddProductAttributeComponent>(item, parameters);
+    //    DialogResult? result = await dialog.Result;
+
+    //    if (result?.Data is ProductAttributeDto content)
+    //    {
+    //        var command = new AddProductAttributeCommand()
+    //        {
+    //            Id = content.Id,
+    //            AttributeId = content.AttributeId,
+    //            ProductId = Product.Id,
+    //            Values = content.Values,
+    //        };
+    //        var response = await _mediator.Send(command);
+    //        if (response.IsSuccess)
+    //        {
+    //            if(item.Id == 0)
+    //            {
+    //                content.Id = response.Data;
+    //                Attributes.Add(content);
+    //            }
+    //            else
+    //            {
+    //                item.Values = content.Values;
+    //            }
+    //        }
+    //    }
+    //}
+
+    private async Task OpenAttributeModal(ProductAttributeDto? item = null)
     {
         DialogParameters parameters = new()
         {
-            Title = item == null? "Add attribute" : "Update attribute",
+            Title = item == null ? $"Add Attribute" : "Update attribute",
             PrimaryAction = "Yes",
             PrimaryActionEnabled = false,
             SecondaryAction = "No",
@@ -178,7 +233,7 @@ public partial class EditProductComponent
             PreventScroll = true
         };
 
-        if(item is null)
+        if (item == null)
         {
             item = new ProductAttributeDto()
             {
@@ -191,26 +246,7 @@ public partial class EditProductComponent
 
         if (result?.Data is ProductAttributeDto content)
         {
-            var command = new AddProductAttributeCommand()
-            {
-                Id = content.Id,
-                AttributeId = content.AttributeId,
-                ProductId = Product.Id,
-                Values = content.Values,
-            };
-            var response = await _mediator.Send(command);
-            if (response.IsSuccess)
-            {
-                if(item.Id == 0)
-                {
-                    content.Id = response.Data;
-                    Attributes.Add(content);
-                }
-                else
-                {
-                    item.Values = content.Values;
-                }
-            }
+            Attributes.Add(content);
         }
     }
 }
