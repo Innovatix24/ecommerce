@@ -1,7 +1,9 @@
 ﻿using Application.Features.Attributes.DTOs;
+using Application.Features.Inventories;
 using Application.Features.Products.DTOs;
 using BongoEcom.Services.Contracts;
 using Domain.Entities.Carts;
+using Domain.Entities.Inventories;
 
 namespace BongoEcom.Services;
 
@@ -19,6 +21,7 @@ public class CartItemModel
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
+    public int SKUId { get; set; }
     public int ImageId { get; set; }
     public int Qty { get; set; }
     public decimal Rate { get; set; }
@@ -93,6 +96,42 @@ public class CartService(SweetAlertService SAlert, UIHelperService UIService, IC
         NotifyStateChanged();
         return true;
     }
+
+    public async Task<bool> AddProduct(ProductDto product, SKUDto sku, List<ItemAttribute>? attributes = null, int qty = 1)
+    {
+        var existingItem = items.FirstOrDefault(i => i.Id == product.Id);
+
+        if (existingItem != null)
+        {
+            UIService.ErrorToastMessage("Already added");
+            //await alertService.ShowErrorAsync("Already added");
+            return false;
+        }
+        else
+        {
+            int imageId = 0;
+            var firstImage = product.Images.FirstOrDefault();
+            if (firstImage is not null) imageId = firstImage.Id;
+
+            var item = new CartItemModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Rate = sku.DiscountPrice ?? sku.Price,
+                Qty = qty,
+                ImageUrl = product.FeatureImageUrl,
+                SKUId = sku.Id,
+                ImageId = imageId,
+                Attributes = attributes ?? new(),
+            };
+            items.Add(item);
+            await cartService.AddItemAsync(item);
+        }
+        UIService.SuccessToastMessage("Product is added to cart");
+        NotifyStateChanged();
+        return true;
+    }
+
 
     public void AddItem(CartItemModel newItem)
     {

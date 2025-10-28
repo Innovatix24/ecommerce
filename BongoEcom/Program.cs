@@ -3,17 +3,15 @@ using BongoEcom;
 using BongoEcom.Components;
 using BongoEcom.Services.Contracts;
 using Infrastructure;
-using QuestPDF.Drawing;
-using System.Runtime.InteropServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-{
-    FontManager.RegisterFont(
-        File.OpenRead("/usr/share/fonts/truetype/siyam-rupali/SiyamRupali.ttf")
-    );
-}
+//if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+//{
+//    FontManager.RegisterFont(
+//        File.OpenRead("/usr/share/fonts/truetype/siyam-rupali/SiyamRupali.ttf")
+//    );
+//}
 
 builder.AddBongoEcom()
     .AddInfrastructure();

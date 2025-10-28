@@ -33,5 +33,6 @@ public class OrderItem : Entity<int>
     public ProductImage ProductImage { get; set; } = default!;
     public string Attributes { get; set; } = "";
     public int ProductImageId { get; set; }
+    public int SKUId { get; set; }
 }
 

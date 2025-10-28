@@ -36,6 +36,7 @@ public class CheckoutOrderItemDto
     public string AttributeJson { get; set; }
     public List<ItemAttribute> Attributes { get; set; } = new();
     public int ImageId { get; set; }
+    public int SKUId { get; set; }
     public string ImageUrl { get; set; } = "";
 }
 
@@ -96,8 +97,9 @@ public class CheckoutOrderHandler : IRequestHandler<CheckoutOrderCommand, Result
                 order.Items.Add(new OrderItem
                 {
                     ProductId = product.Id,
+                    SKUId = item.SKUId,
                     Quantity = item.Quantity,
-                    UnitPrice = product.SalePrice,
+                    UnitPrice = item.UnitPrice,
                     Attributes = item.AttributeJson,
                     ProductImageId = item.ImageId,
                 });

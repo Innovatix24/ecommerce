@@ -136,8 +136,8 @@ public class OrderPdfDocument : IDocument
                         }
                     });
                     table.Cell().Text(item.Quantity.ToString());
-                    table.Cell().Text($"৳{item.UnitPrice:N2}").FontFamily("Siyam Rupali");
-                    table.Cell().Text($"৳{(item.Quantity * item.UnitPrice):N2}").FontFamily("Siyam Rupali"); ;
+                    table.Cell().Text($"{item.UnitPrice:N2}");
+                    table.Cell().Text($"{(item.Quantity * item.UnitPrice):N2}");
                 }
             });
 
@@ -147,7 +147,7 @@ public class OrderPdfDocument : IDocument
                 summaryColumn.Item().Row(row =>
                 {
                     row.RelativeItem().Text("Subtotal:").SemiBold();
-                    row.ConstantItem(100).AlignRight().Text($"৳{_order.SubTotal:N2}").FontFamily("Siyam Rupali"); ;
+                    row.ConstantItem(100).AlignRight().Text($"{_order.SubTotal:N2}");
                 });
 
                 if(_order.Discount > 0)
@@ -155,20 +155,20 @@ public class OrderPdfDocument : IDocument
                     summaryColumn.Item().Row(row =>
                     {
                         row.RelativeItem().Text("Discount : ").SemiBold();
-                        row.ConstantItem(100).AlignRight().Text($" - ৳{_order.Discount:N2}").FontFamily("Siyam Rupali"); ;
+                        row.ConstantItem(100).AlignRight().Text($" - {_order.Discount:N2}");
                     });
                 }
 
                 summaryColumn.Item().Row(row =>
                 {
                     row.RelativeItem().Text("Delivery Charge:").SemiBold();
-                    row.ConstantItem(100).AlignRight().Text($"৳{_order.DeliveryCharge:N2}").FontFamily("Siyam Rupali"); ;
+                    row.ConstantItem(100).AlignRight().Text($"{_order.DeliveryCharge:N2}");
                 });
-
+                
                 summaryColumn.Item().Row(row =>
                 {
                     row.RelativeItem().Text("Total:").FontSize(13).SemiBold();
-                    row.ConstantItem(100).AlignRight().Text($"৳{_order.TotalAmount:N2}").FontSize(13).SemiBold().FontFamily("Siyam Rupali"); ;
+                    row.ConstantItem(100).AlignRight().Text($"{_order.TotalAmount:N2}").FontSize(13).SemiBold();
                 });
             });
         });

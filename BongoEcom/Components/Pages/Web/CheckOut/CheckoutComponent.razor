@@ -162,6 +162,7 @@
         order.Items = CartService.Items.Select(i => new CheckoutOrderItemDto
             {
                 ProductId = i.Id,
+                SKUId = i.SKUId,
                 Quantity = i.Qty,
                 UnitPrice = i.Rate,
                 AttributeStr = i.AttributeStr,
