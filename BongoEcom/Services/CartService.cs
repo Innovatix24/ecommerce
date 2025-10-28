@@ -2,8 +2,6 @@
 using Application.Features.Inventories;
 using Application.Features.Products.DTOs;
 using BongoEcom.Services.Contracts;
-using Domain.Entities.Carts;
-using Domain.Entities.Inventories;
 
 namespace BongoEcom.Services;
 

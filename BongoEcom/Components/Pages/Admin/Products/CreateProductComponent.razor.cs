@@ -4,6 +4,7 @@ using Application.Features.Categories.Queries;
 using Application.Features.Products.DTOs;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Serilog;
 
 namespace BongoEcom.Components.Pages.Admin.Products;
 
@@ -132,6 +133,8 @@ public partial class CreateProductComponent
     {
         foreach (var image in productImages)
         {
+            Log.Error($"Deleting Image : {image.Url}");
+
             if (string.IsNullOrWhiteSpace(image.Url))
                 continue;
 

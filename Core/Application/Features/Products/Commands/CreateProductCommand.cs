@@ -2,6 +2,7 @@
 using Application.Features.Products.DTOs;
 using Application.Services;
 using Domain.Entities.Products;
+using Serilog;
 
 namespace Application.Features.Products.Commands;
 
@@ -110,6 +111,7 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Result
         }
         catch(Exception ex)
         {
+            Log.Error(ex.Message);
             await _context.Database.RollbackTransactionAsync();
             return Result<int>.Failure("Product is not created");
         }

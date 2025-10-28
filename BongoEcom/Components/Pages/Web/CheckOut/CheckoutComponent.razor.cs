@@ -2,6 +2,7 @@
 using Application.Features.Orders.Queries;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Serilog;
 
 namespace BongoEcom.Components.Pages.Web.CheckOut;
 
@@ -113,12 +114,15 @@ public partial class CheckoutComponent
 
         if (result.IsSuccess)
         {
+            Log.Information("Order created");
             CartService.ClearCart();
             Navigation.NavigateTo($"/order-confirmation/{result.Data}");
         }
         else
         {
-            Message = result.Error ?? "Something went wrong while placing the order.";
+            var err = result.Error ?? "Something went wrong while placing the order.";
+            Log.Error(err);
+            Message = err;
         }
     }
 }

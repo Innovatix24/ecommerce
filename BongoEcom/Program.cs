@@ -3,6 +3,7 @@ using BongoEcom;
 using BongoEcom.Components;
 using BongoEcom.Services.Contracts;
 using Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,15 @@ var builder = WebApplication.CreateBuilder(args);
 //    );
 //}
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+//builder.Host.UseSerilog();
+
 builder.AddBongoEcom()
     .AddInfrastructure();
 
@@ -22,15 +32,6 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis");
     options.InstanceName = "BongoEcom_";
 });
-
-//builder.Services.AddSession(options =>
-//{
-//    options.Cookie.Name = "BongoEcom.Session";
-//    options.IdleTimeout = TimeSpan.FromHours(2);
-//    options.Cookie.HttpOnly = true;
-//    options.Cookie.IsEssential = true;
-//    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-//});
 
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -52,6 +53,8 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.UseStaticFiles();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 

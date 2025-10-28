@@ -91,16 +91,21 @@ else
     private async void PrintOrder(OrderDto order)
     {
         var query = new GetOrderDetailsByIdQuery(order.Id);
+
+        UIService.ShowLoader("Please wait ...");
         var result = await _mediator.Send(query);
 
         if (result.IsSuccess)
         {
             if (result.Data is null) return;
+            UIService.HideLoader();
+
             var document = new OrderPdfDocument(result.Data, _env, companyService.CompanyInfo);
             var bytes = document.GeneratePdf();
             var base64Str = Convert.ToBase64String(bytes);
             await JS.InvokeVoidAsync("openPdfInNewTab", base64Str);
         }
+        UIService.HideLoader();
     }
 
     public async void ManageOrder(OrderDto order)
